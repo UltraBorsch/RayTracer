@@ -3,19 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
-using static UnityEngine.GraphicsBuffer;
+using static ComputeHelper;
 
 public class RayGenerator : MonoBehaviour {
-    public Camera cam;
-    public Vector2Int resolution;
-    public float aspect;
+    [SerializeField] private Camera cam;
+    [SerializeField] private Vector2Int resolution;
+    [SerializeField] private float aspect;
     [SerializeField] private Texture2D image; //make rendertexture for to use in shader?
-    public Sphere[] spheres;
-    public RayTracerLight[] lights;
-    public Vector3 prevPos = new(), prevFor = new();
-    public bool useRayTracing = false;
-    public Color ambientColor;
-    public float ambientIntensity;
+    [SerializeField] private Geometry[] spheres;
+    [SerializeField] private RayTracerLight[] lights;
+    [SerializeField] private Vector3 prevPos = new(), prevFor = new();
+    [SerializeField] private bool useRayTracing = false;
+    [SerializeField] private Color ambientColor;
+    [SerializeField] private float ambientIntensity;
+    [SerializeField] private ComputeShader rayTracer;
 
     private RenderTexture TextureFactory() {
         RenderTexture temp = new(resolution.x, resolution.y, 0) {
@@ -31,6 +32,7 @@ public class RayGenerator : MonoBehaviour {
     }
 
     void Start() {
+        SetParam(rayTracer, 10, "test");
         resolution.x = Screen.width;
         resolution.y = Screen.height;
         image = new(resolution.x, resolution.y) {

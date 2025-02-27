@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour {
-    // Start is called before the first frame update
-    public Quaternion rotation;
-    public Vector3 movement;
-    public Rigidbody body;
-    public float movementSpeed, sensitivity;
-    private float pitch, yaw, initialX, initialY;
-    public bool lockMotion;
-    public bool lockRotation;
+    private Quaternion rotation;
+    [SerializeField] private Vector3 movement;
+    [SerializeField] private Rigidbody body;
+    [SerializeField] private float movementSpeed, sensitivity;
+    [SerializeField] private float pitch, yaw;
+    private float initialX, initialY;
+    [SerializeField] private bool lockMotion;
+    [SerializeField] private bool lockRotation;
 
     void Start() {
         Cursor.lockState = CursorLockMode.Locked; //cursor settings
@@ -23,7 +23,6 @@ public class CameraController : MonoBehaviour {
         yaw = initialRotation.y;
     }
 
-    // Update is called once per frame
     void Update() {
         if (!lockMotion) {
             movement.x = Input.GetAxisRaw("Horizontal"); //is the player moving left/right (1 or -1), i.e. A or D

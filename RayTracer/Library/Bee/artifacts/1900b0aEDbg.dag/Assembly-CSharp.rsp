@@ -402,10 +402,12 @@
 "Assets/Scripts/Controllers/RayGenerator.cs"
 "Assets/Scripts/Geometry/RayTracerLight.cs"
 "Assets/Scripts/Geometry/Sphere.cs"
+"Assets/Scripts/Helper/ComputeHelper.cs"
 "Assets/Scripts/Helper/Constants.cs"
 "Assets/Scripts/Helper/Geometry.cs"
 "Assets/Scripts/Helper/Intersection.cs"
 "Assets/Scripts/Helper/Ray.cs"
+"Assets/Scripts/Helper/Structs.cs"
 "Assets/Scripts/ScriptableObjects/Scripts/LightInfo.cs"
 "Assets/Scripts/ScriptableObjects/Scripts/MatInfo.cs"
 -langversion:9.0

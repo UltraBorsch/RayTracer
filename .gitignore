@@ -2,13 +2,13 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
-/Slime Mold/[Ll]ibrary/
-/Slime Mold/[Tt]emp/
-/Slime Mold/[Oo]bj/
-/Slime Mold/[Bb]uild/
-/Slime Mold/[Bb]uilds/
-/Slime Mold/[Ll]ogs/
-/Slime Mold/[Uu]ser[Ss]ettings/
+/RayTracer/[Ll]ibrary/
+/RayTracer/[Tt]emp/
+/RayTracer/[Oo]bj/
+/RayTracer/[Bb]uild/
+/RayTracer/[Bb]uilds/
+/RayTracer/[Ll]ogs/
+/RayTracer/[Uu]ser[Ss]ettings/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
