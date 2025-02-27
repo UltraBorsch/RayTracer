@@ -39,9 +39,9 @@ public class CameraController : MonoBehaviour {
 
     void FixedUpdate() {
 
-        body.velocity = movement.z * movementSpeed * transform.forward; //Add velocity to player relative to direction theyre looking
-        body.velocity += movement.x * movementSpeed * transform.right;
-        body.velocity += movement.y * movementSpeed * transform.up;
+        body.linearVelocity = movement.z * movementSpeed * transform.forward; //Add velocity to player relative to direction theyre looking
+        body.linearVelocity += movement.x * movementSpeed * transform.right;
+        body.linearVelocity += movement.y * movementSpeed * transform.up;
 
         transform.localRotation = Quaternion.Euler(new Vector3(pitch, yaw, 0)); //rotate players body along y axis (left/right), will affect what direction they move in since forward changes
     }
