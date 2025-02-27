@@ -5,6 +5,7 @@ Although I add my own twists, with the end goal for this to be a standalone crea
 # TODO
 * Move the ray tracing code onto a compute shader, so that the user can move the camera around with reasonable FPS.
 * Update the current ComputeHelper with a new one I've made for other projects.
+* General refactoring is much needed.
 * Code in more standardized shapes (cubes, planes, quadrics, implicits, bezier surface patches, etc).
 * Code in complex shapes (meshs, hierarchies, constructive geometry, etc).
 * Additional features (some of which may already be done):
