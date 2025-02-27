@@ -1,6 +1,6 @@
 # RayTracer
 Inspiration taken from Sebastian Lague's and Acerola's videos regarding the same topic, and to an extent a similarly themed class assignment.\
-Although I add my own twists, with the end goal for this to be a standalone creation.
+Although, I add my own twists, with the end goal for this to be a standalone creation.
 
 # TODO
 * Move the ray tracing code onto a compute shader, so that the user can move the camera around with reasonable FPS.
