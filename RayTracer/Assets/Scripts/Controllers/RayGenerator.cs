@@ -10,7 +10,7 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private Vector2Int resolution;
     [SerializeField] private float aspect;
     [SerializeField] private Texture2D image; //make rendertexture for to use in shader?
-    [SerializeField] private Geometry[] spheres;
+    [SerializeField] private Geometry[] geometry;
     [SerializeField] private RayTracerLight[] lights;
     [SerializeField] private Vector3 prevPos = new(), prevFor = new();
     [SerializeField] private bool useRayTracing = false;
@@ -32,7 +32,6 @@ public class RayGenerator : MonoBehaviour {
     }
 
     void Start() {
-        SetParam(rayTracer, 10, "test");
         resolution.x = Screen.width;
         resolution.y = Screen.height;
         image = new(resolution.x, resolution.y) {
@@ -89,8 +88,8 @@ public class RayGenerator : MonoBehaviour {
                 Ray ray = new(cam.transform.position, dir);
                 Intersection intersection = new();
 
-                foreach (Sphere sphere in spheres) 
-                    sphere.Intersect(ray, intersection);
+                foreach (Geometry geo in geometry) 
+                    geo.Intersect(ray, intersection);
 
                 Color colour = Color.black;
                 if (intersection.t < float.PositiveInfinity) {
