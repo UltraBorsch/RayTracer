@@ -8,18 +8,18 @@ Although I add my own twists, with the end goal for this to be a standalone crea
 * Code in more standardized shapes (cubes, planes, quadrics, implicits, bezier surface patches, etc).
 * Code in complex shapes (meshs, hierarchies, constructive geometry, etc).
 * Additional features (some of which may already be done):
-*     Anti-Aliasing/super sampling (uniform grid, stochastic pattern, adaptive, jittering).
-*     Mirror/fresnel reflection.
-*     Refraction.
-*     Motion blur.
-*     Depth of field blur.
-*     Area lights + path tracing.
+    * Anti-Aliasing/super sampling (uniform grid, stochastic pattern, adaptive, jittering).
+    * Mirror/fresnel reflection.
+    * Refraction.
+    * Motion blur.
+    * Depth of field blur.
+    * Area lights + path tracing.
 * Non ray-tracer features
-*     Environment maps (cube and or sphere).
-*     texture maps (additionally, adaptive sampling/mipmaps).
-*     perlin/simplex/procedual noise/textures.
+    * Environment maps (cube and or sphere).
+    * Texture maps (additionally, adaptive sampling/mipmaps).
+    * Perlin/simplex/procedual noise/textures.
 * Optimization
-*     Hierarchical Bounding volumes for complex meshes.
-*     Spatial hashing/ray marching.
+    * Hierarchical Bounding volumes for complex meshes.
+    * Spatial hashing/ray marching.
 #Known Issues
 * Very slow, especially when involving movement.
