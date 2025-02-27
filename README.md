@@ -4,7 +4,7 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 
 # TODO
 * Move the ray tracing code onto a compute shader, so that the user can move the camera around with reasonable FPS.
-* Update the current ComputeHelper with a new one I've made for other projects.
+* Add/update ComputeHelper.
 * General refactoring is much needed.
 * Camera + user movement adjustments (lock mouse to screen, enable/disable both types of movements, sensitivity, etc).
 * Code in more standardized shapes (cubes, planes, quadrics, implicits, bezier surface patches, etc).
