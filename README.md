@@ -8,7 +8,8 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 * General refactoring is much needed.
 * Camera + user movement adjustments (lock mouse to screen, enable/disable both types of movements, sensitivity, etc).
 * Code in more standardized shapes (cubes, planes, quadrics, implicits, bezier surface patches, etc).
-* Code in complex shapes (meshs, hierarchies, constructive geometry, etc).
+* Code in complex shapes (meshes, hierarchies, constructive geometry, etc).
+    * Confirmation that said shapes conform, e.g. that meshes have normal, no trailing vertices, etc.
 * Additional features (some of which may already be done):
     * Anti-Aliasing/super sampling (uniform grid, stochastic pattern, adaptive, jittering).
     * Mirror/fresnel reflection.
