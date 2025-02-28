@@ -4,19 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using static ComputeHelper;
+using static Structs;
 
 public class RayGenerator : MonoBehaviour {
     [SerializeField] private Camera cam;
     [SerializeField] private Vector2Int resolution;
     [SerializeField] private float aspect;
     [SerializeField] private Texture2D image; //make rendertexture for to use in shader?
-    [SerializeField] private Geometry[] geometry;
+    [SerializeField] private Sphere[] geometry;
     [SerializeField] private RayTracerLight[] lights;
     [SerializeField] private Vector3 prevPos = new(), prevFor = new();
     [SerializeField] private bool useRayTracing = false;
     [SerializeField] private Color ambientColor;
     [SerializeField] private float ambientIntensity;
     [SerializeField] private ComputeShader rayTracer;
+
+    private SphereStruct[] spheres;
 
     private RenderTexture TextureFactory() {
         RenderTexture temp = new(resolution.x, resolution.y, 0) {
@@ -48,7 +51,7 @@ public class RayGenerator : MonoBehaviour {
         if (useRayTracing && (prevPos != cam.transform.position || prevFor != cam.transform.forward)) {
             prevPos = cam.transform.position;
             prevFor = cam.transform.forward;
-            Render();
+            RenderGPU();
             image.Apply();
         }
         
@@ -60,6 +63,10 @@ public class RayGenerator : MonoBehaviour {
         } else { //else use normal rendering
             Graphics.Blit(source, destination);
         }
+    }
+
+    private void RenderGPU() {
+
     }
 
     private void Render() {
@@ -88,7 +95,7 @@ public class RayGenerator : MonoBehaviour {
                 Ray ray = new(cam.transform.position, dir);
                 Intersection intersection = new();
 
-                foreach (Geometry geo in geometry) 
+                foreach (Geometry<SphereStruct> geo in geometry) 
                     geo.Intersect(ray, intersection);
 
                 Color colour = Color.black;

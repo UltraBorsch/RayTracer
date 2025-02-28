@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Structs;
 
-public class Sphere : Geometry {
+public class Sphere : Geometry<SphereStruct> {
     public float radius;
 
-    public SphereStruct sphere;
-
     public void Start() {
-        sphere = new SphereStruct(radius, transform.position);
+        geoStruct = new SphereStruct(radius, transform.position);
     }
 
     public override void Intersect(Ray ray, Intersection intersection) {
@@ -20,7 +18,7 @@ public class Sphere : Geometry {
 
         if (discriminant >= 0) {
             float sqrt = Mathf.Sqrt(discriminant);
-            float t1 = (-b + sqrt) / 2;
+            //float t1 = (-b + sqrt) / 2;
             float t2 = (-b - sqrt) / 2;
 
             if (!(t2 >= intersection.t || t2 <= Constants.EPSILON)) {
@@ -28,7 +26,7 @@ public class Sphere : Geometry {
                 intersection.t = t2;
                 intersection.normal = n;
                 intersection.position = ray.Extend(t2);
-                intersection.mat = mats[0];
+                intersection.mat = Mats[0];
             }
         }
     }
