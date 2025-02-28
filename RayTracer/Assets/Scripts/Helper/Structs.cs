@@ -32,10 +32,12 @@ public static class Structs {
     public struct SphereStruct {
         public float radius;
         public Vector3 center;
+        public int matID;
 
-        public SphereStruct(float radius, Vector3 center) {
+        public SphereStruct(float radius, Vector3 center, int matID) {
             this.radius = radius;
             this.center = center;
+            this.matID = matID;
         }
     }
 }

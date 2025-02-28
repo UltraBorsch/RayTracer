@@ -4,27 +4,23 @@
 #include "Includes/Structs.h"
 #include "Includes/Global.compute"
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
 uint2 resolution;
-RWTexture2D<float4> Result;
+RWTexture2D<float4> result;
 
-float4 ambientColor;
+float4 ambientColour;
 float ambientIntensity;
 
 //d is (i think) focal length. near/far planes not considered yet
-float3 cam_dir; //direction TO cam, not direction cam is facing
-float cam_aspect, cam_FOV;
-float3 cam_pos, cam_up;
-float d = 1f;
-float top = d * tan(0.5f * PI * cam_FOV / 180f);
-float right = cam_aspect * top;
-float bottom = -top;
-float left = -right;
+float3 camDirection; //direction TO cam, not direction cam is facing
+float3 camPosition;
 
-float3 w = cam_dir;
-float3 u = normalize(cross(cam_up, w));
-float3 v = cross(w, u);
+float d;
+float top;
+float right;
+float bottom;
+float left;
+float3 u;
+float3 v;
 
 RWStructuredBuffer<Light> lights;
 int lightCount;
@@ -77,9 +73,9 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
 
     float su = left + (right - left) * x / resolution.x;
     float sv = bottom + (top - bottom) * y / resolution.y;
-    float3 dir = normalize(su * u + sv * v - d * w);
+    float3 dir = normalize(su * u + sv * v - d * camDirection);
 
-    Ray ray = Ray(cam_pos, dir);
+    Ray ray = Ray(camPosition, dir);
     Intersection intersection = Intersection();
 
     for (int i = 0; i < geometryCount; i++) {
@@ -107,8 +103,8 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
             colour += lambertian + bp;
         }
 
-        colour += ambientIntensity * ambientColor;
+        colour += ambientIntensity * ambientColour;
                     
     }
-    Result[id.x, id.y] = colour;
+    result[id.x, id.y] = colour;
 }

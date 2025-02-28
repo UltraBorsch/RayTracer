@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using static ComputeHelper;
 using static Structs;
+using static SceneManager;
 
 public class RayGenerator : MonoBehaviour {
     [SerializeField] private Camera cam;
@@ -15,11 +16,14 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private RayTracerLight[] lights;
     [SerializeField] private Vector3 prevPos = new(), prevFor = new();
     [SerializeField] private bool useRayTracing = false;
-    [SerializeField] private Color ambientColor;
+    [SerializeField] private Color ambientColour;
     [SerializeField] private float ambientIntensity;
+    
     [SerializeField] private ComputeShader rayTracer;
-
     private SphereStruct[] spheres;
+    private Mat[] mats;
+    private LightInfo[] lightStructs;
+    private ComputeBuffer sphereBuffer, matBuffer, lightBuffer;
 
     private RenderTexture TextureFactory() {
         RenderTexture temp = new(resolution.x, resolution.y, 0) {
@@ -34,7 +38,18 @@ public class RayGenerator : MonoBehaviour {
         return temp;
     }
 
+    private T[] CreateStructArray<T>(IStructable<T>[] arr) where T : struct {
+        T[] structs = new T[arr.Length];
+        for (int i = 0; i < structs.Length; i++)
+            structs[i] = arr[i].Struct;
+        return structs;
+    }
+
     void Start() {
+        spheres = CreateStructArray(geometry);
+        lightStructs = CreateStructArray(lights);
+        mats = CreateStructArray(Mats);
+
         resolution.x = Screen.width;
         resolution.y = Screen.height;
         image = new(resolution.x, resolution.y) {
@@ -44,6 +59,7 @@ public class RayGenerator : MonoBehaviour {
         };
         aspect = resolution.x / resolution.y;
 
+        SetRendarVars();
     }
 
     // Update is called once per frame
@@ -66,7 +82,50 @@ public class RayGenerator : MonoBehaviour {
     }
 
     private void RenderGPU() {
+        //only change if our viewing angle has changed since the last call
+        if (prevFor != cam.transform.forward) {
+            //d is (i think) focal length. near/far planes not considered yet
+            Vector3 camDirection = -cam.transform.forward;
+            float d = 1f;
+            float top = d * Mathf.Tan(0.5f * Mathf.PI * cam.fieldOfView / 180f);
+            float right = cam.aspect * top;
 
+            Vector3 u = Vector3.Normalize(Vector3.Cross(cam.transform.up, camDirection));
+            Vector3 v = Vector3.Cross(camDirection, u);
+
+            SetParam(rayTracer, camDirection, "camDirection");
+            SetParam(rayTracer, d, "d");
+            SetParam(rayTracer, top, "top");
+            SetParam(rayTracer, right, "right");
+            SetParam(rayTracer, -right, "left");
+            SetParam(rayTracer, -top, "bottom");
+            SetParam(rayTracer, u, "u");
+            SetParam(rayTracer, v, "v");
+        }
+
+        //only change if the cams position has changed since the last call
+        if (prevPos != cam.transform.position)
+            SetParam(rayTracer, cam.transform.position, "camPosition");
+
+        Run(rayTracer, "TraceRays", resolution.x, resolution.y);
+    }
+    
+    private void SetRendarVars() {
+        //static variables that shouldnt change during runtime (at least for the purpose of this application).
+        //  resolution, the geometry buffers, the output image, ambient vars, etc
+        SetParam(rayTracer, new[] { resolution.x, resolution.y }, "resolution");
+        rayTracer.SetTexture(0, "result", image);
+        sphereBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "geometry", spheres);
+        matBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "mats", mats);
+        lightBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lightStructs);
+        SetParam(rayTracer, ambientIntensity, "ambientIntensity");
+        SetParam(rayTracer, ambientColour, "ambientColour");
+    }
+
+    void OnDestroy() {
+        Release(sphereBuffer);
+        Release(matBuffer);
+        Release(lightBuffer);
     }
 
     private void Render() {
@@ -116,7 +175,7 @@ public class RayGenerator : MonoBehaviour {
                         colour += lambertian + bp;
                     }
 
-                    colour += ambientIntensity * ambientColor;
+                    colour += ambientIntensity * ambientColour;
                     
                 }
                 image.SetPixel(i, j, colour);

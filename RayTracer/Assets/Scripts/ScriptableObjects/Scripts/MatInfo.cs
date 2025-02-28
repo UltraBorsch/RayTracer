@@ -4,14 +4,14 @@ using UnityEngine;
 using static Structs;
 
 [CreateAssetMenu(menuName = "ScriptableObjects/Material")]
-public class MatInfo : ScriptableObject {
+public class MatInfo : ScriptableObject, IStructable<Mat> {
     public uint hardness;
     public Color diffuseColour;
     public Color specularColour;
 
-    private Mat mat;
+    public Mat Struct { get; private set; }
 
     public void OnEnable() {
-        mat = new(hardness, diffuseColour, specularColour);
+        Struct = new(hardness, diffuseColour, specularColour);
     }
 }

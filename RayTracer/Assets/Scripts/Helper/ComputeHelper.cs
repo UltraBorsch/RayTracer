@@ -25,7 +25,9 @@ public static class ComputeHelper {
             case int i: shader.SetInt(valueName, i); break;
             case float f: shader.SetFloat(valueName, f); break;
             case bool b: shader.SetBool(valueName, b); break;
-            case Vector4 v: shader.SetVector(valueName, v); break;
+            case Vector2 v2: shader.SetVector(valueName, v2); break;
+            case Vector3 v3: shader.SetVector(valueName, v3); break;
+            case Vector4 v4: shader.SetVector(valueName, v4); break;
             case Matrix4x4 m: shader.SetMatrix(valueName, m); break;
             case int[] iarr: shader.SetInts(valueName, iarr); break;
             case float[] farr: shader.SetFloats(valueName, farr); break;
@@ -71,5 +73,17 @@ public static class ComputeHelper {
         buffer.GetData(arr);
         buffer.Release();
         return arr;
+    }
+
+    /// Releases supplied buffer/s if not null
+    public static void Release(params ComputeBuffer[] buffers) {
+        for (int i = 0; i < buffers.Length; i++) {
+            buffers[i]?.Release();
+        }
+    }
+
+    /// Copy the contents of one render texture into another. Assumes textures are the same size.
+    public static void CopyRenderTexture(Texture source, RenderTexture target) {
+        Graphics.Blit(source, target);
     }
 }

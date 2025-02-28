@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static Structs;
+using static SceneManager;
 
 public class Sphere : Geometry<SphereStruct> {
     public float radius;
 
     public void Start() {
-        geoStruct = new SphereStruct(radius, transform.position);
+        Struct = new SphereStruct(radius, transform.position, GetMatId(Mats[0]));
     }
 
     public override void Intersect(Ray ray, Intersection intersection) {

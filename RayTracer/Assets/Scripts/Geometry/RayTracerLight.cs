@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Structs;
 
-public class RayTracerLight : MonoBehaviour {
+public class RayTracerLight : MonoBehaviour , IStructable<LightInfo> {
     public LightingInfo info;
     [SerializeField] new private Light light;
 
-    private LightInfo lightStruct;
+    public LightInfo Struct { get; private set; }
 
     public void Start() {
-        lightStruct = new(info.intensity, info.directional, info.lightColour, transform.forward, transform.position);
+        Struct = new(info.intensity, info.directional, info.lightColour, transform.forward, transform.position);
     }
 }
