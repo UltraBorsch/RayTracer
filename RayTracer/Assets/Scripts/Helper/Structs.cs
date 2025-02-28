@@ -18,12 +18,24 @@ public static class Structs {
         public bool directional;
         public Color lightColour;
         public Vector3 direction;
+        public Vector3 position;
 
-        public LightInfo(float intensity, bool directional, Color lightColour, Vector3 direction) {
+        public LightInfo(float intensity, bool directional, Color lightColour, Vector3 direction, Vector3 Position) {
             this.intensity = intensity;
             this.directional = directional;
             this.lightColour = lightColour;
             this.direction = direction;
+            this.position = Position;
+        }
+    }
+
+    public struct SphereStruct {
+        public float radius;
+        public Vector3 center;
+
+        public SphereStruct(float radius, Vector3 center) {
+            this.radius = radius;
+            this.center = center;
         }
     }
 }

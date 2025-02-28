@@ -1,15 +1,114 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel TraceRays
+#include "Includes/Constants.h"
+#include "Includes/Structs.h"
+#include "Includes/Global.compute"
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 uint2 resolution;
-int test;
 RWTexture2D<float4> Result;
+
+float4 ambientColor;
+float ambientIntensity;
+
+//d is (i think) focal length. near/far planes not considered yet
+float3 cam_dir; //direction TO cam, not direction cam is facing
+float cam_aspect, cam_FOV;
+float3 cam_pos, cam_up;
+float d = 1f;
+float top = d * tan(0.5f * PI * cam_FOV / 180f);
+float right = cam_aspect * top;
+float bottom = -top;
+float left = -right;
+
+float3 w = cam_dir;
+float3 u = normalize(cross(cam_up, w));
+float3 v = cross(w, u);
+
+RWStructuredBuffer<Light> lights;
+int lightCount;
+RWStructuredBuffer<Mat> mats;
+int matCount;
+
+interface Intersectable {
+    Intersection Intersect (Ray ray, Intersection intersection);
+};
+
+class Sphere : Intersectable {
+    float radius;
+    float3 center;
+    
+    Intersection Intersect (Ray ray, Intersection intersection) {
+        float b = 2 * dot(ray.direction, ray.origin - center);
+        float3 vec = ray.origin - center;
+        float c = dot(vec, vec) - radius * radius;
+
+        float discriminant = b * b - 4 * c;
+
+        if (discriminant >= 0) {
+            float sqrt = sqrt(discriminant);
+            float t1 = (-b + sqrt) / 2;
+            float t2 = (-b - sqrt) / 2;
+
+            if (!(t2 >= intersection.t || t2 <= EPSILON)) {
+                float3 n = normalize(ray.Extend(t2) - center);
+                intersection.t = t2;
+                intersection.normal = n;
+                intersection.position = ray.Extend(t2);
+                intersection.matID = mats[0];
+            }
+        }
+        return intersection;
+    }
+};
+
+RWStructuredBuffer<Sphere> geometry;
+
+//Intersectable geometry[];
+int geometryCount;
 
 [numthreads(32,32,1)]
 void TraceRays (uint3 id : SV_DispatchThreadID) {
     if (id.x >= resolution.x || id.y >= resolution.y) return;
 
-    Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    float x = id.x + 0.5f;
+    float y = id.y + 0.5f;
+
+    float su = left + (right - left) * x / resolution.x;
+    float sv = bottom + (top - bottom) * y / resolution.y;
+    float3 dir = normalize(su * u + sv * v - d * w);
+
+    Ray ray = Ray(cam_pos, dir);
+    Intersection intersection = Intersection();
+
+    for (int i = 0; i < geometryCount; i++) {
+        Intersectable geo = geometry[i];
+        intersection = geo.Intersect(ray, intersection);
+    }
+    
+    float4 colour = float4(0, 0, 0, 1);
+    if (!isinf(intersection.t)) {
+        Mat mat = mats[intersection.matID];
+        for (int i = 0; i < lightCount; i++) {
+            Light light = lights[i];
+            float3 lightDir;
+            if (light.directional)
+                lightDir = -light.direction; 
+            else
+                lightDir = normalize(light.position - intersection.position);
+                        //check if point is in shadow
+                        //if not, lambertian, phong, attenuation, etc
+            float4 lambertian = light.intensity * light.lightColour * mat.diffuseColour * max(0f, dot(intersection.normal, lightDir));
+
+            float3 h = normalize(-dir + lightDir);
+            float4 bp = light.intensity * light.lightColour * mat.specularColour * pow(max(0f, dot(intersection.normal, h)), mat.hardness);
+
+            colour += lambertian + bp;
+        }
+
+        colour += ambientIntensity * ambientColor;
+                    
+    }
+    Result[id.x, id.y] = colour;
 }

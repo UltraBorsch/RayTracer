@@ -4,15 +4,15 @@ using UnityEngine;
 using static Structs;
 
 [CreateAssetMenu(menuName = "ScriptableObjects/Light")]
-public class LightingInfo : ScriptableObject {
+public class LightingInfo : MonoBehaviour {
     public float intensity;
     public bool directional;
     public Color lightColour;
     public Vector3 direction;
 
-    private LightInfo light;
+    private new LightInfo light;
 
-    public void OnEnable() {
-        light = new(intensity, directional, lightColour, direction);
+    void Start() {
+        light = new(intensity, directional, lightColour, direction, transform.position);
     }
 }
