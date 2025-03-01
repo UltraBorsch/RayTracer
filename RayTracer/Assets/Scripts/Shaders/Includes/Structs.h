@@ -1,7 +1,7 @@
 struct Intersection {
     float t = 1/0;
-    float3 normal = new();
-    float3 position = new();
+    float3 normal;
+    float3 position;
     int matID;
 };
 
@@ -13,7 +13,7 @@ struct Mat {
 
 struct Light {
     float intensity;
-    bool directional;
+    int directional;
     float4 lightColour;
     float3 direction;
     float3 position;

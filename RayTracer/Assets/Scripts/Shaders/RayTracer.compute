@@ -1,8 +1,39 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel TraceRays
 #include "Includes/Constants.h"
-#include "Includes/Structs.h"
-#include "Includes/Global.compute"
+//#include "Includes/Structs.h"
+//#include "Includes/Global.compute"
+
+struct Intersection {
+    float t;
+    float3 normal;
+    float3 position;
+    int matId;
+    float checked;
+};
+
+struct Mat {
+    uint hardness;
+    float4 diffuseColour;
+    float4 specularColour;
+};
+
+struct Light {
+    float intensity;
+    int directional;
+    float4 lightColour;
+    float3 direction;
+    float3 position;
+};
+
+struct Ray {
+    float3 origin;
+    float3 direction;
+
+    float3 Extend (float t) {
+        return origin + t * direction;
+    }
+};
 
 uint2 resolution;
 RWTexture2D<float4> result;
@@ -34,6 +65,7 @@ interface Intersectable {
 class Sphere : Intersectable {
     float radius;
     float3 center;
+    int matId;
     
     Intersection Intersect (Ray ray, Intersection intersection) {
         float b = 2 * dot(ray.direction, ray.origin - center);
@@ -43,18 +75,19 @@ class Sphere : Intersectable {
         float discriminant = b * b - 4 * c;
 
         if (discriminant >= 0) {
-            float sqrt = sqrt(discriminant);
-            float t1 = (-b + sqrt) / 2;
-            float t2 = (-b - sqrt) / 2;
+            float root = sqrt(discriminant);
+            //float t1 = (-b + root) / 2;
+            float t2 = (-b - root) / 2;
 
             if (!(t2 >= intersection.t || t2 <= EPSILON)) {
                 float3 n = normalize(ray.Extend(t2) - center);
                 intersection.t = t2;
                 intersection.normal = n;
                 intersection.position = ray.Extend(t2);
-                intersection.matID = mats[0];
+                intersection.matId = matId;
             }
         }
+        intersection.checked = isnan(dot(ray.direction, ray.origin - center));
         return intersection;
     }
 };
@@ -73,10 +106,13 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
 
     float su = left + (right - left) * x / resolution.x;
     float sv = bottom + (top - bottom) * y / resolution.y;
-    float3 dir = normalize(su * u + sv * v - d * camDirection);
+    float3 dir = normalize(su * u + sv * v - d * camDirection); 
 
-    Ray ray = Ray(camPosition, dir);
-    Intersection intersection = Intersection();
+    Ray ray;
+    ray.origin = camPosition;
+    ray.direction = dir;
+    Intersection intersection;
+    intersection.t = 1.0 / 0;
 
     for (int i = 0; i < geometryCount; i++) {
         Intersectable geo = geometry[i];
@@ -85,7 +121,7 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
     
     float4 colour = float4(0, 0, 0, 1);
     if (!isinf(intersection.t)) {
-        Mat mat = mats[intersection.matID];
+        Mat mat = mats[intersection.matId];
         for (int i = 0; i < lightCount; i++) {
             Light light = lights[i];
             float3 lightDir;
@@ -95,16 +131,15 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
                 lightDir = normalize(light.position - intersection.position);
                         //check if point is in shadow
                         //if not, lambertian, phong, attenuation, etc
-            float4 lambertian = light.intensity * light.lightColour * mat.diffuseColour * max(0f, dot(intersection.normal, lightDir));
+            float4 lambertian = light.intensity * light.lightColour * mat.diffuseColour * max(0, dot(intersection.normal, lightDir));
 
             float3 h = normalize(-dir + lightDir);
-            float4 bp = light.intensity * light.lightColour * mat.specularColour * pow(max(0f, dot(intersection.normal, h)), mat.hardness);
+            float4 bp = light.intensity * light.lightColour * mat.specularColour * pow(max(0, dot(intersection.normal, h)), mat.hardness);
 
             colour += lambertian + bp;
         }
 
-        colour += ambientIntensity * ambientColour;
-                    
+        colour += ambientIntensity * ambientColour;        
     }
-    result[id.x, id.y] = colour;
+    result[id.xy] = colour;
 }

@@ -9,7 +9,7 @@ public class RayTracerLight : MonoBehaviour , IStructable<LightInfo> {
 
     public LightInfo Struct { get; private set; }
 
-    public void Start() {
+    public void SetupStruct() {
         Struct = new(info.intensity, info.directional, info.lightColour, transform.forward, transform.position);
     }
 }

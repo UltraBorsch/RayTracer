@@ -7,10 +7,6 @@ using static SceneManager;
 public class Sphere : Geometry<SphereStruct> {
     public float radius;
 
-    public void Start() {
-        Struct = new SphereStruct(radius, transform.position, GetMatId(Mats[0]));
-    }
-
     public override void Intersect(Ray ray, Intersection intersection) {
         float b = 2 * Vector3.Dot(ray.direction, ray.origin - transform.position);
         float c = Vector3.SqrMagnitude(ray.origin - transform.position) - radius * radius;
@@ -30,5 +26,9 @@ public class Sphere : Geometry<SphereStruct> {
                 intersection.mat = Mats[0];
             }
         }
+    }
+
+    public override void SetupStruct() {
+        Struct = new SphereStruct(radius, transform.position, GetMatId(Mats[0]));
     }
 }

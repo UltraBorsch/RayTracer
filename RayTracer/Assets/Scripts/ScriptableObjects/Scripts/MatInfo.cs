@@ -11,7 +11,7 @@ public class MatInfo : ScriptableObject, IStructable<Mat> {
 
     public Mat Struct { get; private set; }
 
-    public void OnEnable() {
+    public void SetupStruct() {
         Struct = new(hardness, diffuseColour, specularColour);
     }
 }

@@ -15,29 +15,29 @@ public static class Structs {
 
     public struct LightInfo {
         public float intensity;
-        public bool directional;
+        public int directional;
         public Color lightColour;
         public Vector3 direction;
         public Vector3 position;
 
-        public LightInfo(float intensity, bool directional, Color lightColour, Vector3 direction, Vector3 Position) {
+        public LightInfo(float intensity, bool directional, Color lightColour, Vector3 direction, Vector3 position) {
             this.intensity = intensity;
-            this.directional = directional;
+            this.directional = directional ? 1 : 0;
             this.lightColour = lightColour;
             this.direction = direction;
-            this.position = Position;
+            this.position = position;
         }
     }
 
     public struct SphereStruct {
         public float radius;
         public Vector3 center;
-        public int matID;
+        public int matId;
 
-        public SphereStruct(float radius, Vector3 center, int matID) {
+        public SphereStruct(float radius, Vector3 center, int matId) {
             this.radius = radius;
             this.center = center;
-            this.matID = matID;
+            this.matId = matId;
         }
     }
 }

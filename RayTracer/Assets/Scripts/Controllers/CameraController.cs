@@ -12,6 +12,9 @@ public class CameraController : MonoBehaviour {
     [SerializeField] private bool lockMotion;
     [SerializeField] private bool lockRotation;
 
+    public bool useRayTracing;
+    public RenderTexture image;
+
     void Start() {
         Cursor.lockState = CursorLockMode.Locked; //cursor settings
         Cursor.visible = false;
@@ -43,5 +46,13 @@ public class CameraController : MonoBehaviour {
         body.linearVelocity += movement.y * movementSpeed * transform.up;
 
         transform.localRotation = Quaternion.Euler(new Vector3(pitch, yaw, 0)); //rotate players body along y axis (left/right), will affect what direction they move in since forward changes
+    }
+
+    private void OnRenderImage(RenderTexture source, RenderTexture destination) {
+        if (useRayTracing) { //if rendering raytracer
+            Graphics.Blit(image, destination);
+        } else { //else use normal rendering
+            Graphics.Blit(source, destination);
+        }
     }
 }

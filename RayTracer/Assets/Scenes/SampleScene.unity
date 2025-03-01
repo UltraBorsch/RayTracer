@@ -174,18 +174,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 628c667ddd675524ba826731d8d71f12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sceneInfo: {fileID: 11400000, guid: 6349e7fe56bd55146979e804ce47c76c, type: 2}
   cam: {fileID: 963194227}
+  camController: {fileID: 963194232}
   resolution: {x: 420, y: 420}
   aspect: 0
   image: {fileID: 0}
-  spheres:
+  geometry:
   - {fileID: 112733090}
   lights:
   - {fileID: 793858672}
   prevPos: {x: 0, y: 0, z: 0}
   prevFor: {x: 0, y: 0, z: 0}
-  useRayTracing: 0
-  ambientColor: {r: 1, g: 1, b: 1, a: 0}
+  useRayTracing: 1
+  ambientColour: {r: 0.5660378, g: 0.26966894, b: 0.26966894, a: 0}
   ambientIntensity: 0.2
   rayTracer: {fileID: 7200000, guid: 26982570525b2804198c54c1fbdc9949, type: 3}
 --- !u!1001 &602124362
@@ -268,6 +270,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85c5854fac5c9a147bfd785185de3d95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!108 &793858673 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 4869826726553002713, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
+  m_PrefabInstance: {fileID: 4358274336174195805}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &963194225 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7167042093470915546, guid: bccf5a33e28645e48b50e7bc37c98900, type: 3}
@@ -305,6 +312,17 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &963194232 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5593449432467833205, guid: bccf5a33e28645e48b50e7bc37c98900, type: 3}
+  m_PrefabInstance: {fileID: 2552149612010612007}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e73bfc9251b88143bced32c757045d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2552149612010612007
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -413,6 +431,10 @@ PrefabInstance:
       propertyPath: info
       value: 
       objectReference: {fileID: 11400000, guid: 90c895aadeea41145b78612c5b2b3706, type: 2}
+    - target: {fileID: 4883050484208944930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
+      propertyPath: light
+      value: 
+      objectReference: {fileID: 793858673}
     - target: {fileID: 8353546690853261930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
       propertyPath: m_RootOrder
       value: 2

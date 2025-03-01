@@ -8,10 +8,13 @@ using static Structs;
 using static SceneManager;
 
 public class RayGenerator : MonoBehaviour {
+    [SerializeField] private SceneInfo sceneInfo;
+
     [SerializeField] private Camera cam;
+    [SerializeField] private CameraController camController;
     [SerializeField] private Vector2Int resolution;
     [SerializeField] private float aspect;
-    [SerializeField] private Texture2D image; //make rendertexture for to use in shader?
+    [SerializeField] private RenderTexture image; //make rendertexture for to use in shader?
     [SerializeField] private Sphere[] geometry;
     [SerializeField] private RayTracerLight[] lights;
     [SerializeField] private Vector3 prevPos = new(), prevFor = new();
@@ -40,24 +43,30 @@ public class RayGenerator : MonoBehaviour {
 
     private T[] CreateStructArray<T>(IStructable<T>[] arr) where T : struct {
         T[] structs = new T[arr.Length];
-        for (int i = 0; i < structs.Length; i++)
+        for (int i = 0; i < structs.Length; i++) {
+            arr[i].SetupStruct();
             structs[i] = arr[i].Struct;
+        }
         return structs;
+    }
+
+    private void Awake() {
+        SetupScene(sceneInfo);
     }
 
     void Start() {
         spheres = CreateStructArray(geometry);
         lightStructs = CreateStructArray(lights);
+        //Debug.Log(spheres[0].matId);
         mats = CreateStructArray(Mats);
 
         resolution.x = Screen.width;
         resolution.y = Screen.height;
-        image = new(resolution.x, resolution.y) {
-            wrapMode = TextureWrapMode.Clamp,
-            anisoLevel = 0,
-            filterMode = FilterMode.Point
-        };
+        image = TextureFactory();
         aspect = resolution.x / resolution.y;
+
+        camController.useRayTracing = useRayTracing;
+        camController.image = image;
 
         SetRendarVars();
     }
@@ -67,44 +76,35 @@ public class RayGenerator : MonoBehaviour {
         if (useRayTracing && (prevPos != cam.transform.position || prevFor != cam.transform.forward)) {
             prevPos = cam.transform.position;
             prevFor = cam.transform.forward;
-            RenderGPU();
-            image.Apply();
+            Render();
         }
         
     }
 
-    private void OnRenderImage(RenderTexture source, RenderTexture destination) {
-        if (useRayTracing) { //if rendering raytracer
-            Graphics.Blit(image, destination);
-        } else { //else use normal rendering
-            Graphics.Blit(source, destination);
-        }
-    }
-
-    private void RenderGPU() {
+    private void Render() {
         //only change if our viewing angle has changed since the last call
-        if (prevFor != cam.transform.forward) {
+        //if (prevFor != cam.transform.forward) {
             //d is (i think) focal length. near/far planes not considered yet
             Vector3 camDirection = -cam.transform.forward;
             float d = 1f;
             float top = d * Mathf.Tan(0.5f * Mathf.PI * cam.fieldOfView / 180f);
-            float right = cam.aspect * top;
+            float left = cam.aspect * top;
 
-            Vector3 u = Vector3.Normalize(Vector3.Cross(cam.transform.up, camDirection));
+            Vector3 u = Vector3.Cross(cam.transform.up, camDirection).normalized;
             Vector3 v = Vector3.Cross(camDirection, u);
 
             SetParam(rayTracer, camDirection, "camDirection");
             SetParam(rayTracer, d, "d");
             SetParam(rayTracer, top, "top");
-            SetParam(rayTracer, right, "right");
-            SetParam(rayTracer, -right, "left");
+            SetParam(rayTracer, -left, "right");
+            SetParam(rayTracer, left, "left");
             SetParam(rayTracer, -top, "bottom");
             SetParam(rayTracer, u, "u");
             SetParam(rayTracer, v, "v");
-        }
+        //}
 
         //only change if the cams position has changed since the last call
-        if (prevPos != cam.transform.position)
+        //if (prevPos != cam.transform.position)
             SetParam(rayTracer, cam.transform.position, "camPosition");
 
         Run(rayTracer, "TraceRays", resolution.x, resolution.y);
@@ -120,68 +120,15 @@ public class RayGenerator : MonoBehaviour {
         lightBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lightStructs);
         SetParam(rayTracer, ambientIntensity, "ambientIntensity");
         SetParam(rayTracer, ambientColour, "ambientColour");
+
+        SetParam(rayTracer, lights.Length, "lightCount");
+        SetParam(rayTracer, mats.Length, "matCount");
+        SetParam(rayTracer, spheres.Length, "geometryCount");
     }
 
     void OnDestroy() {
         Release(sphereBuffer);
         Release(matBuffer);
         Release(lightBuffer);
-    }
-
-    private void Render() {
-        //d is (i think) focal length. near/far planes not considered yet
-        Vector3 cam_dir = -cam.transform.forward;
-        float d = 1f;
-        float top = d * Mathf.Tan(0.5f * Mathf.PI * cam.fieldOfView / 180f);
-        float right = cam.aspect * top;
-        float bottom = -top;
-        float left = -right;
-
-        Vector3 w = cam_dir;
-        Vector3 u = Vector3.Cross(cam.transform.up, w);
-        u = Vector3.Normalize(u);
-        Vector3 v = Vector3.Cross(w, u);
-
-        for (int i = 0; i < resolution.x; i++) {
-            for (int j = 0; j < resolution.y; j++) {
-                float x = i + 0.5f;
-                float y = j + 0.5f;
-
-                float su = left + (right - left) * x / resolution.x;
-                float sv = bottom + (top - bottom) * y / resolution.y;
-                Vector3 dir = Vector3.Normalize(su * u + sv * v - d * w);
-
-                Ray ray = new(cam.transform.position, dir);
-                Intersection intersection = new();
-
-                foreach (Geometry<SphereStruct> geo in geometry) 
-                    geo.Intersect(ray, intersection);
-
-                Color colour = Color.black;
-                if (intersection.t < float.PositiveInfinity) {
-                    foreach (RayTracerLight light in lights) {
-                        Vector3 lightDir;
-                        if (light.info.directional)
-                            lightDir = -light.info.direction;
-                        else
-                            lightDir = Vector3.Normalize(light.transform.position - intersection.position);
-                        //check if point is in shadow
-                        //if not, lambertian, phong, attenuation, etc
-                        Color lambertian = light.info.intensity * light.info.lightColour * intersection.mat.diffuseColour * Mathf.Max(0f, Vector3.Dot(intersection.normal, lightDir));
-
-                        Vector3 h = Vector3.Normalize(-dir + lightDir);
-                        Color bp = light.info.intensity * light.info.lightColour * intersection.mat.specularColour * Mathf.Pow(Mathf.Max(0f, Vector3.Dot(intersection.normal, h)), intersection.mat.hardness);
-
-                        colour += lambertian + bp;
-                    }
-
-                    colour += ambientIntensity * ambientColour;
-                    
-                }
-                image.SetPixel(i, j, colour);
-                
-
-            }
-        }
     }
 }

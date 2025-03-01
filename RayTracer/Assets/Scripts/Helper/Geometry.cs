@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Geometry<T> : MonoBehaviour, IStructable<T> where T : struct {
-    public virtual MatInfo[] Mats { get; set; }
+    [SerializeField] private MatInfo[] mats;
+    public virtual MatInfo[] Mats { get { return mats; } protected set { mats = value; } }
     public abstract void Intersect(Ray ray, Intersection intersection);
+
+    public abstract void SetupStruct();
 
     public T Struct { get; protected set; }
 }
