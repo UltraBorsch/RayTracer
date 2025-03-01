@@ -349,7 +349,7 @@ PrefabInstance:
       objectReference: {fileID: 963194231}
     - target: {fileID: 5593449432467833205, guid: bccf5a33e28645e48b50e7bc37c98900, type: 3}
       propertyPath: lockMotion
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5593449432467833205, guid: bccf5a33e28645e48b50e7bc37c98900, type: 3}
       propertyPath: sensitivity
@@ -357,7 +357,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5593449432467833205, guid: bccf5a33e28645e48b50e7bc37c98900, type: 3}
       propertyPath: lockRotation
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5593449432467833205, guid: bccf5a33e28645e48b50e7bc37c98900, type: 3}
       propertyPath: movementSpeed
