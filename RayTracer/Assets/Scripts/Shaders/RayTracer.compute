@@ -1,43 +1,11 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel TraceRays
-#include "Includes/Constants.h"
-//#include "Includes/Structs.h"
-//#include "Includes/Global.compute"
+#include "Includes/Geometry.cginc" //already includes constants
 
-struct Intersection {
-    float t;
-    float3 normal;
-    float3 position;
-    int matId;
-    float checked;
-};
+RWTexture2D<float4> result; //raytrace result
 
-struct Mat {
-    uint hardness;
-    float4 diffuseColour;
-    float4 specularColour;
-};
-
-struct Light {
-    float intensity;
-    int directional;
-    float4 lightColour;
-    float3 direction;
-    float3 position;
-};
-
-struct Ray {
-    float3 origin;
-    float3 direction;
-
-    float3 Extend (float t) {
-        return origin + t * direction;
-    }
-};
-
+//global variables that do not change
 uint2 resolution;
-RWTexture2D<float4> result;
-
 float4 ambientColour;
 float ambientIntensity;
 
@@ -45,6 +13,7 @@ float ambientIntensity;
 float3 camDirection; //direction TO cam, not direction cam is facing
 float3 camPosition;
 
+//variables for generating rays
 float d;
 float top;
 float right;
@@ -53,49 +22,15 @@ float left;
 float3 u;
 float3 v;
 
+
 RWStructuredBuffer<Light> lights;
 int lightCount;
 RWStructuredBuffer<Mat> mats;
 int matCount;
 
-interface Intersectable {
-    Intersection Intersect (Ray ray, Intersection intersection);
-};
-
-class Sphere : Intersectable {
-    float radius;
-    float3 center;
-    int matId;
-    
-    Intersection Intersect (Ray ray, Intersection intersection) {
-        float b = 2 * dot(ray.direction, ray.origin - center);
-        float3 vec = ray.origin - center;
-        float c = dot(vec, vec) - radius * radius;
-
-        float discriminant = b * b - 4 * c;
-
-        if (discriminant >= 0) {
-            float root = sqrt(discriminant);
-            //float t1 = (-b + root) / 2;
-            float t2 = (-b - root) / 2;
-
-            if (!(t2 >= intersection.t || t2 <= EPSILON)) {
-                float3 n = normalize(ray.Extend(t2) - center);
-                intersection.t = t2;
-                intersection.normal = n;
-                intersection.position = ray.Extend(t2);
-                intersection.matId = matId;
-            }
-        }
-        intersection.checked = isnan(dot(ray.direction, ray.origin - center));
-        return intersection;
-    }
-};
-
-RWStructuredBuffer<Sphere> geometry;
-
-//Intersectable geometry[];
-int geometryCount;
+//scene objects
+RWStructuredBuffer<Sphere> spheres;
+int sphereCount;
 
 [numthreads(32,32,1)]
 void TraceRays (uint3 id : SV_DispatchThreadID) {
@@ -108,19 +43,13 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
     float sv = bottom + (top - bottom) * y / resolution.y;
     float3 dir = normalize(su * u + sv * v - d * camDirection); 
 
-    Ray ray;
-    ray.origin = camPosition;
-    ray.direction = dir;
-    Intersection intersection;
-    intersection.t = 1.0 / 0;
+    Ray ray = GenerateRay(camPosition, dir);
+    Intersection intersection = GenerateIntersection();
 
-    for (int i = 0; i < geometryCount; i++) {
-        Intersectable geo = geometry[i];
-        intersection = geo.Intersect(ray, intersection);
-    }
+    intersection = CheckForIntersections(spheres, sphereCount, intersection, ray);
     
     float4 colour = float4(0, 0, 0, 1);
-    if (!isinf(intersection.t)) {
+    if (intersection.t < INF) {
         Mat mat = mats[intersection.matId];
         for (int i = 0; i < lightCount; i++) {
             Light light = lights[i];

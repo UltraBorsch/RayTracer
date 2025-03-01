@@ -57,7 +57,6 @@ public class RayGenerator : MonoBehaviour {
     void Start() {
         spheres = CreateStructArray(geometry);
         lightStructs = CreateStructArray(lights);
-        //Debug.Log(spheres[0].matId);
         mats = CreateStructArray(Mats);
 
         resolution.x = Screen.width;
@@ -68,7 +67,7 @@ public class RayGenerator : MonoBehaviour {
         camController.useRayTracing = useRayTracing;
         camController.image = image;
 
-        SetRendarVars();
+        SetRenderVars();
     }
 
     // Update is called once per frame
@@ -110,12 +109,12 @@ public class RayGenerator : MonoBehaviour {
         Run(rayTracer, "TraceRays", resolution.x, resolution.y);
     }
     
-    private void SetRendarVars() {
+    private void SetRenderVars() {
         //static variables that shouldnt change during runtime (at least for the purpose of this application).
         //  resolution, the geometry buffers, the output image, ambient vars, etc
         SetParam(rayTracer, new[] { resolution.x, resolution.y }, "resolution");
         rayTracer.SetTexture(0, "result", image);
-        sphereBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "geometry", spheres);
+        sphereBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
         matBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "mats", mats);
         lightBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lightStructs);
         SetParam(rayTracer, ambientIntensity, "ambientIntensity");
@@ -123,7 +122,7 @@ public class RayGenerator : MonoBehaviour {
 
         SetParam(rayTracer, lights.Length, "lightCount");
         SetParam(rayTracer, mats.Length, "matCount");
-        SetParam(rayTracer, spheres.Length, "geometryCount");
+        SetParam(rayTracer, spheres.Length, "sphereCount");
     }
 
     void OnDestroy() {
