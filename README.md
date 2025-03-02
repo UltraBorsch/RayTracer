@@ -21,5 +21,6 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 * Optimization
     * Hierarchical Bounding volumes for complex meshes.
     * Spatial hashing/ray marching.
+    * Culling, probably by giving every geometry a bounding box.
 # Known Issues
 
