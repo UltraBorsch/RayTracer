@@ -15,18 +15,14 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private Vector2Int resolution;
     [SerializeField] private float aspect;
     [SerializeField] private RenderTexture image; //make rendertexture for to use in shader?
-    [SerializeField] private Sphere[] geometry;
     [SerializeField] private RayTracerLight[] lights;
-    [SerializeField] private Vector3 prevPos = new(), prevFor = new();
+    [SerializeField] private Vector3? prevPos = null, prevFor = null;
     [SerializeField] private bool useRayTracing = false;
     [SerializeField] private Color ambientColour;
     [SerializeField] private float ambientIntensity;
-    
+
     [SerializeField] private ComputeShader rayTracer;
-    private SphereStruct[] spheres;
-    private Mat[] mats;
-    private LightInfo[] lightStructs;
-    private ComputeBuffer sphereBuffer, matBuffer, lightBuffer;
+    [SerializeField] private Sphere[] spheres;
 
     private RenderTexture TextureFactory() {
         RenderTexture temp = new(resolution.x, resolution.y, 0) {
@@ -41,24 +37,11 @@ public class RayGenerator : MonoBehaviour {
         return temp;
     }
 
-    private T[] CreateStructArray<T>(IStructable<T>[] arr) where T : struct {
-        T[] structs = new T[arr.Length];
-        for (int i = 0; i < structs.Length; i++) {
-            arr[i].SetupStruct();
-            structs[i] = arr[i].Struct;
-        }
-        return structs;
-    }
-
     private void Awake() {
         SetupScene(sceneInfo);
     }
 
     void Start() {
-        spheres = CreateStructArray(geometry);
-        lightStructs = CreateStructArray(lights);
-        mats = CreateStructArray(Mats);
-
         resolution.x = Screen.width;
         resolution.y = Screen.height;
         image = TextureFactory();
@@ -73,16 +56,15 @@ public class RayGenerator : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         if (useRayTracing && (prevPos != cam.transform.position || prevFor != cam.transform.forward)) {
-            prevPos = cam.transform.position;
-            prevFor = cam.transform.forward;
             Render();
         }
-        
+        prevPos = cam.transform.position;
+        prevFor = cam.transform.forward;
     }
 
     private void Render() {
         //only change if our viewing angle has changed since the last call
-        //if (prevFor != cam.transform.forward) {
+        if (prevFor != cam.transform.forward) {
             //d is (i think) focal length. near/far planes not considered yet
             Vector3 camDirection = -cam.transform.forward;
             float d = 1f;
@@ -100,10 +82,10 @@ public class RayGenerator : MonoBehaviour {
             SetParam(rayTracer, -top, "bottom");
             SetParam(rayTracer, u, "u");
             SetParam(rayTracer, v, "v");
-        //}
+        }
 
         //only change if the cams position has changed since the last call
-        //if (prevPos != cam.transform.position)
+        if (prevPos != cam.transform.position)
             SetParam(rayTracer, cam.transform.position, "camPosition");
 
         Run(rayTracer, "TraceRays", resolution.x, resolution.y);
@@ -114,20 +96,14 @@ public class RayGenerator : MonoBehaviour {
         //  resolution, the geometry buffers, the output image, ambient vars, etc
         SetParam(rayTracer, new[] { resolution.x, resolution.y }, "resolution");
         rayTracer.SetTexture(0, "result", image);
-        sphereBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
-        matBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "mats", mats);
-        lightBuffer = CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lightStructs);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "mats", Mats);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lights);
         SetParam(rayTracer, ambientIntensity, "ambientIntensity");
         SetParam(rayTracer, ambientColour, "ambientColour");
 
         SetParam(rayTracer, lights.Length, "lightCount");
-        SetParam(rayTracer, mats.Length, "matCount");
+        SetParam(rayTracer, Mats.Length, "matCount");
         SetParam(rayTracer, spheres.Length, "sphereCount");
-    }
-
-    void OnDestroy() {
-        Release(sphereBuffer);
-        Release(matBuffer);
-        Release(lightBuffer);
     }
 }

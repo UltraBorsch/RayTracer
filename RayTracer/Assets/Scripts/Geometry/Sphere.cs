@@ -28,7 +28,7 @@ public class Sphere : Geometry<SphereStruct> {
         }
     }
 
-    public override void SetupStruct() {
-        Struct = new SphereStruct(radius, transform.position, GetMatId(Mats[0]));
+    public override SphereStruct GetStruct() {
+        return new(radius, transform.position, GetMatId(Mats[0]));
     }
 }

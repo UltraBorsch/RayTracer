@@ -9,9 +9,7 @@ public class MatInfo : ScriptableObject, IStructable<Mat> {
     public Color diffuseColour;
     public Color specularColour;
 
-    public Mat Struct { get; private set; }
-
-    public void SetupStruct() {
-        Struct = new(hardness, diffuseColour, specularColour);
+    public Mat GetStruct() {
+        return new(hardness, diffuseColour, specularColour);
     }
 }

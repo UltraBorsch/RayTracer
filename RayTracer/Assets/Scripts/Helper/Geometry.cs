@@ -7,7 +7,5 @@ public abstract class Geometry<T> : MonoBehaviour, IStructable<T> where T : stru
     public virtual MatInfo[] Mats { get { return mats; } protected set { mats = value; } }
     public abstract void Intersect(Ray ray, Intersection intersection);
 
-    public abstract void SetupStruct();
-
-    public T Struct { get; protected set; }
+    public abstract T GetStruct();
 }

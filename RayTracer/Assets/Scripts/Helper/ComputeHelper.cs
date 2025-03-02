@@ -1,9 +1,20 @@
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public static class ComputeHelper {
+    private static List<ComputeBuffer> createdBuffers = new();
+
+    static ComputeHelper() {
+        Application.quitting += OnQuit;
+    }
+
+    private static void OnQuit() {
+        Release(createdBuffers.ToArray());
+    }
 
     //run a kernel of a shader, calculates optimal dispatch sizes
     //  thread sizes/dimension in kernel is how many threads the gpu will run during the job (usually multiple of 32 or 64)
@@ -52,27 +63,41 @@ public static class ComputeHelper {
     }
 
     //creates and returns a buffer from data. will also fill with values
-    public static ComputeBuffer CreateAndSetBuffer<T>(ComputeShader shader, string kernel, string BufferName, T[] arr) {
+    public static ComputeBuffer CreateAndSetBuffer<T>(ComputeShader shader, string kernel, string BufferName, T[] arr) where T : struct {
         ComputeBuffer buffer = CreateBuffer<T>(arr.Length);
         buffer.SetData(arr);
         shader.SetBuffer(shader.FindKernel(kernel), BufferName, buffer);
         return buffer;
     }
 
+    public static ComputeBuffer CreateAndSetBuffer<T>(ComputeShader shader, string kernel, string BufferName, IStructable<T>[] arr) where T : struct {
+        int count = arr.Length;
+
+        T[] structs = new T[count];
+        for (int i = 0; i < count; i++)
+            structs[i] = arr[i].GetStruct();
+
+        ComputeBuffer buffer = CreateBuffer<T>(count);
+        buffer.SetData(structs);
+        shader.SetBuffer(shader.FindKernel(kernel), BufferName, buffer);
+        return buffer;
+    }
+
     public static ComputeBuffer CreateBuffer<T>(int size) {
         ComputeBuffer buffer = new(size, System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)));
+        createdBuffers.Add(buffer);
         return buffer;
     }
 
     public static void GetDataAndRelease<T>(ComputeBuffer buffer, T[] arr) {
         buffer.GetData(arr);
-        buffer.Release();
+        Release(buffer);
     }
 
     public static T[] GetDataAndRelease<T>(ComputeBuffer buffer) {
         T[] arr = new T[buffer.count];
         buffer.GetData(arr);
-        buffer.Release();
+        Release(buffer);
         return arr;
     }
 
@@ -80,6 +105,7 @@ public static class ComputeHelper {
     public static void Release(params ComputeBuffer[] buffers) {
         for (int i = 0; i < buffers.Length; i++) {
             buffers[i]?.Release();
+            createdBuffers.Remove(buffers[i]);
         }
     }
 
