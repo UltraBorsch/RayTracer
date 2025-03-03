@@ -1,10 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 using static ComputeHelper;
-using static Structs;
 using static SceneManager;
 
 public class RayGenerator : MonoBehaviour {
@@ -17,34 +14,24 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private RenderTexture image; //make rendertexture for to use in shader?
     [SerializeField] private RayTracerLight[] lights;
     [SerializeField] private Vector3? prevPos = null, prevFor = null;
-    [SerializeField] private bool useRayTracing = false;
+    [SerializeField] private bool useRayTracing, useScreenResolution;
     [SerializeField] private Color ambientColour;
     [SerializeField] private float ambientIntensity;
 
     [SerializeField] private ComputeShader rayTracer;
     [SerializeField] private Sphere[] spheres;
 
-    private RenderTexture TextureFactory() {
-        RenderTexture temp = new(resolution.x, resolution.y, 0) {
-            enableRandomWrite = true,
-            graphicsFormat = GraphicsFormat.R16G16B16A16_SFloat,
-            autoGenerateMips = false,
-            filterMode = FilterMode.Bilinear,
-            wrapMode = TextureWrapMode.Clamp
-        };
-        temp.Create();
-
-        return temp;
-    }
-
     private void Awake() {
         SetupScene(sceneInfo);
     }
 
     void Start() {
-        resolution.x = Screen.width;
-        resolution.y = Screen.height;
-        image = TextureFactory();
+        if (useScreenResolution) {
+            resolution.x = Screen.width;
+            resolution.y = Screen.height;
+        }
+
+        image = TextureFactory(resolution);
         aspect = resolution.x / resolution.y;
 
         camController.useRayTracing = useRayTracing;
@@ -94,7 +81,7 @@ public class RayGenerator : MonoBehaviour {
     private void SetRenderVars() {
         //static variables that shouldnt change during runtime (at least for the purpose of this application).
         //  resolution, the geometry buffers, the output image, ambient vars, etc
-        SetParam(rayTracer, new[] { resolution.x, resolution.y }, "resolution");
+        SetParam(rayTracer, resolution, "resolution");
         rayTracer.SetTexture(0, "result", image);
         CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
         CreateAndSetBuffer(rayTracer, "TraceRays", "mats", Mats);

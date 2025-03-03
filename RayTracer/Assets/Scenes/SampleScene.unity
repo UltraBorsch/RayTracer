@@ -180,16 +180,15 @@ MonoBehaviour:
   resolution: {x: 420, y: 420}
   aspect: 0
   image: {fileID: 0}
-  geometry:
-  - {fileID: 112733090}
   lights:
   - {fileID: 793858672}
-  prevPos: {x: 0, y: 0, z: 0}
-  prevFor: {x: 0, y: 0, z: 0}
   useRayTracing: 1
-  ambientColour: {r: 0.5660378, g: 0.26966894, b: 0.26966894, a: 0}
+  useScreenResolution: 1
+  ambientColour: {r: 0.14150941, g: 0.14150941, b: 0.14150941, a: 0}
   ambientIntensity: 0.2
   rayTracer: {fileID: 7200000, guid: 26982570525b2804198c54c1fbdc9949, type: 3}
+  spheres:
+  - {fileID: 112733090}
 --- !u!1001 &602124362
 PrefabInstance:
   m_ObjectHideFlags: 0

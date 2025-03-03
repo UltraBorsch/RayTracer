@@ -23,15 +23,18 @@ struct Intersection {
     int matId;
 };
 
-Intersection GenerateIntersection() {
+Intersection GenerateIntersection (float t, float3 normal, float3 position, int matId) {
     Intersection intersection;
-    intersection.t = INF;
+    intersection.t = t;
+    intersection.normal = normal;
+    intersection.position = position;
+    intersection.matId = matId;
     return intersection;
 }
 
-interface IIntersectable {
-    Intersection Intersect (Ray ray, Intersection intersection);
-};
+Intersection GenerateIntersection () {
+    return GenerateIntersection(INF, float3(0, 0, 0), float3(0, 0, 0), 0);
+}
 
 struct Mat {
     uint hardness;

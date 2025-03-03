@@ -1,9 +1,6 @@
-using NUnit.Framework;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 public static class ComputeHelper {
     private static readonly List<ComputeBuffer> createdBuffers = new();
@@ -47,6 +44,8 @@ public static class ComputeHelper {
             case float[] farr: shader.SetFloats(valueName, farr); break;
             case Vector4[] varr: shader.SetVectorArray(valueName, varr); break;
             case Matrix4x4[] marr: shader.SetMatrixArray(valueName, marr); break;
+            case Vector2Int iv2: shader.SetInts(valueName, new[] {iv2.x, iv2.y }); break;
+            case Vector3Int iv3: shader.SetInts(valueName, new[] { iv3.x, iv3.y, iv3.z }); break;
             default: Debug.LogError($"Error: {typeof(T)} is not an implemented type to pass to shader {shader.name}."); break;
         }
     }
@@ -118,5 +117,29 @@ public static class ComputeHelper {
     /// <summary> Copy the contents of one render texture into another. Assumes textures are the same size. </summary>
     public static void CopyRenderTexture(Texture source, RenderTexture target) {
         Graphics.Blit(source, target);
+    }
+
+    /// <summary> Creates a RenderTexture of given dimensions. Convenience method for shaders. </summary>
+    public static RenderTexture TextureFactory(int width, int height) {
+        RenderTexture temp = new(width, height, 0) {
+            enableRandomWrite = true,
+            graphicsFormat = GraphicsFormat.R16G16B16A16_SFloat,
+            autoGenerateMips = false,
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp
+        };
+        temp.Create();
+
+        return temp;
+    }
+
+    /// <summary> Creates a RenderTexture of given resolution. Convenience method for shaders. </summary>
+    public static RenderTexture TextureFactory(Vector2Int resolution) {
+        return TextureFactory(resolution.x, resolution.y);
+    }
+
+    /// <summary> Creates a RenderTexture of given resolution. Convenience method for shaders. </summary>
+    public static RenderTexture TextureFactory(Resolution resolution) {
+        return TextureFactory(resolution.width, resolution.height);
     }
 }

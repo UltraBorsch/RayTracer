@@ -18,11 +18,8 @@ struct Sphere {
             float t2 = (-b - root) / 2;
 
             if (!(t2 >= intersection.t || t2 <= EPSILON)) {
-                float3 n = normalize(ray.Extend(t2) - center);
-                intersection.t = t2;
-                intersection.normal = n;
-                intersection.position = ray.Extend(t2);
-                intersection.matId = matId;
+                float3 normal = normalize(ray.Extend(t2) - center);
+                intersection = GenerateIntersection(t2, normal, ray.Extend(t2), matId);
             }
         }
         return intersection;
@@ -46,8 +43,19 @@ struct Plane {
     int matId[2];
     
     Intersection Intersect (Ray ray, Intersection intersection) {
-
-        return intersection;
+        float denom = dot(normal, ray.direction);
+        
+        if (denom >= 0)
+            return intersection;
+        
+        float t = dot(coord - ray.origin, normal) / denom;
+        if (t >= intersection.t || t <= EPSILON)
+            return intersection;
+        
+        float3 position = ray.origin + t * ray.direction;
+        float total = floor(position.x) + floor(position.z);
+        
+        return GenerateIntersection(t, normal, position, total % 2);
     }
 };
 
@@ -56,6 +64,31 @@ struct Quadric {
     int matId;
     
     Intersection Intersect (Ray ray, Intersection intersection) {
+        float a = dot(ray.direction, mul(params, float4(ray.direction.xyz, 0)).xyz);
+        float b = dot(ray.origin, mul(params, float4(ray.direction.xyz, 0)).xyz) + dot(ray.direction, mul(params, float4(ray.origin.xyz, 0)).xyz);
+        float c = dot(ray.origin, mul(params, float4(ray.origin.xyz, 0)).xyz);
+        
+        float discriminant = b * b - 4 * a * c;
+        
+        if (a == 0) {
+            float t = -c / b;
+            float3 normal = float3(0, 0, 0); //??????
+            float3 position = ray.Extend(t);
+            intersection = GenerateIntersection(t, normal, position, matId);
+        } else if (discriminant >= 0) {
+            float root = sqrt(discriminant);
+            float sol1 = (-b + root) / (2 * a), sol2 = (-b - root) / (2 * a);
+            float closest = sol1 < sol2 ? sol1 : sol2;
+            
+            if (closest >= 0 && !(closest >= intersection.t || closest <= EPSILON)) {
+                float3 position = ray.Extend(closest);
+                float nx = dot(position, params._11_12_23 + params._14);
+                float ny = dot(position.yxz, params._22_12_13 + params._24);
+                float nz = dot(position.xyx, params._33_13_23 + params._34);
+                float3 normal = normalize(float3(nx, ny, nz));
+                intersection = GenerateIntersection(closest, normal, position, matId);
+            }
+        }
 
         return intersection;
     }
