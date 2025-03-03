@@ -32,6 +32,13 @@ int matCount;
 RWStructuredBuffer<Sphere> spheres;
 int sphereCount;
 
+RWStructuredBuffer<Plane> planes;
+int planeCount;
+
+RWStructuredBuffer<Quadric> quadrics;
+int quadricCount;
+
+
 [numthreads(32,32,1)]
 void TraceRays (uint3 id : SV_DispatchThreadID) {
     if (id.x >= resolution.x || id.y >= resolution.y) return;
@@ -45,8 +52,10 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
 
     Ray ray = GenerateRay(camPosition, dir);
     Intersection intersection = GenerateIntersection();
-
+    
     intersection = CheckForIntersections(spheres, sphereCount, intersection, ray);
+    intersection = CheckForIntersections(planes, planeCount, intersection, ray);
+    intersection = CheckForIntersections(quadrics, quadricCount, intersection, ray);
     
     float4 colour = float4(0, 0, 0, 1);
     if (intersection.t < INF) {

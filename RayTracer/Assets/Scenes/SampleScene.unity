@@ -189,6 +189,8 @@ MonoBehaviour:
   rayTracer: {fileID: 7200000, guid: 26982570525b2804198c54c1fbdc9949, type: 3}
   spheres:
   - {fileID: 112733090}
+  planes: []
+  quadrics: []
 --- !u!1001 &602124362
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -426,6 +428,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4869826726553002713, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
+      propertyPath: m_Type
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4883050484208944930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
       propertyPath: info
       value: 

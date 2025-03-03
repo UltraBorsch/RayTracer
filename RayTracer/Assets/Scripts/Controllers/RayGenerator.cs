@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using static ComputeHelper;
 using static SceneManager;
-
 public class RayGenerator : MonoBehaviour {
     [SerializeField] private SceneInfo sceneInfo;
 
@@ -20,6 +19,8 @@ public class RayGenerator : MonoBehaviour {
 
     [SerializeField] private ComputeShader rayTracer;
     [SerializeField] private Sphere[] spheres;
+    [SerializeField] private Plane[] planes;
+    [SerializeField] private Quadric[] quadrics;
 
     private void Awake() {
         SetupScene(sceneInfo);
@@ -83,14 +84,24 @@ public class RayGenerator : MonoBehaviour {
         //  resolution, the geometry buffers, the output image, ambient vars, etc
         SetParam(rayTracer, resolution, "resolution");
         rayTracer.SetTexture(0, "result", image);
-        CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
-        CreateAndSetBuffer(rayTracer, "TraceRays", "mats", Mats);
-        CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lights);
-        SetParam(rayTracer, ambientIntensity, "ambientIntensity");
-        SetParam(rayTracer, ambientColour, "ambientColour");
 
         SetParam(rayTracer, lights.Length, "lightCount");
         SetParam(rayTracer, Mats.Length, "matCount");
         SetParam(rayTracer, spheres.Length, "sphereCount");
+        SetParam(rayTracer, planes.Length, "planeCount");
+        SetParam(rayTracer, quadrics.Length, "quadricCount");
+
+        spheres = spheres.Length == 0 ? new[] { gameObject.AddComponent<Sphere>() } : spheres;
+        planes = planes.Length == 0 ? new[] { gameObject.AddComponent<Plane>() } : planes;
+        quadrics = quadrics.Length == 0 ? new[] { gameObject.AddComponent<Quadric>() } : quadrics;
+
+        CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "planes", planes);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "quadrics", quadrics);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "mats", Mats);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lights);
+        
+        SetParam(rayTracer, ambientIntensity, "ambientIntensity");
+        SetParam(rayTracer, ambientColour, "ambientColour");
     }
 }

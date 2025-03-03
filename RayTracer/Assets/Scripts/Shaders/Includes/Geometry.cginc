@@ -40,7 +40,7 @@ struct AABB {
 struct Plane {
     float3 coord;
     float3 normal;
-    int matId[2];
+    int2 matId;
     
     Intersection Intersect (Ray ray, Intersection intersection) {
         float denom = dot(normal, ray.direction);
@@ -55,7 +55,7 @@ struct Plane {
         float3 position = ray.origin + t * ray.direction;
         float total = floor(position.x) + floor(position.z);
         
-        return GenerateIntersection(t, normal, position, total % 2);
+        return GenerateIntersection(t, normal, position, matId[total % 2]);
     }
 };
 

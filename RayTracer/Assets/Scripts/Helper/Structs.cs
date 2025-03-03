@@ -40,4 +40,26 @@ public static class Structs {
             this.matId = matId;
         }
     }
+
+    public struct PlaneStruct {
+        public Vector3 coord;
+        public Vector3 normal;
+        public Vector2Int matId;
+
+        public PlaneStruct(Vector3 coord, Vector3 normal, Vector2Int matId) {
+            this.coord = coord;
+            this.normal = normal;
+            this.matId = matId;
+        }
+    }
+
+    public struct QuadricStruct {
+        public Matrix4x4 parameters;
+        public int matId;
+
+        public QuadricStruct(Matrix4x4 parameters, int matId) {
+            this.parameters = parameters;
+            this.matId = matId;
+        }
+    }
 }
