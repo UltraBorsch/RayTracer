@@ -22,6 +22,10 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private Plane[] planes;
     [SerializeField] private Quadric[] quadrics;
 
+    [SerializeField] private Sphere dummySphere;
+    [SerializeField] private Plane dummyPlane;
+    [SerializeField] private Quadric dummyQuadric;
+
     private void Awake() {
         SetupScene(sceneInfo);
     }
@@ -91,9 +95,9 @@ public class RayGenerator : MonoBehaviour {
         SetParam(rayTracer, planes.Length, "planeCount");
         SetParam(rayTracer, quadrics.Length, "quadricCount");
 
-        spheres = spheres.Length == 0 ? new[] { gameObject.AddComponent<Sphere>() } : spheres;
-        planes = planes.Length == 0 ? new[] { gameObject.AddComponent<Plane>() } : planes;
-        quadrics = quadrics.Length == 0 ? new[] { gameObject.AddComponent<Quadric>() } : quadrics;
+        spheres = spheres.Length == 0 ? new[] { dummySphere } : spheres;
+        planes = planes.Length == 0 ? new[] { dummyPlane } : planes;
+        quadrics = quadrics.Length == 0 ? new[] { dummyQuadric } : quadrics;
 
         CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
         CreateAndSetBuffer(rayTracer, "TraceRays", "planes", planes);

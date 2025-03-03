@@ -53,9 +53,9 @@ struct Plane {
             return intersection;
         
         float3 position = ray.origin + t * ray.direction;
-        float total = floor(position.x) + floor(position.z);
+        int total = floor(position.x) + floor(position.z);
         
-        return GenerateIntersection(t, normal, position, matId[total % 2]);
+        return GenerateIntersection(t, normal, position, matId[total & 1]);
     }
 };
 
@@ -64,9 +64,11 @@ struct Quadric {
     int matId;
     
     Intersection Intersect (Ray ray, Intersection intersection) {
-        float a = dot(ray.direction, mul(params, float4(ray.direction.xyz, 0)).xyz);
-        float b = dot(ray.origin, mul(params, float4(ray.direction.xyz, 0)).xyz) + dot(ray.direction, mul(params, float4(ray.origin.xyz, 0)).xyz);
-        float c = dot(ray.origin, mul(params, float4(ray.origin.xyz, 0)).xyz);
+        float3 d = ray.direction;
+        
+        float a = mul(float4(ray.direction, 1), mul(params, float4(ray.direction, 1)));
+        float b = mul(float4(ray.origin, 1), mul(params, float4(ray.direction, 1))) + mul(float4(ray.direction, 1), mul(params, float4(ray.origin, 1)));
+        float c = mul(float4(ray.origin, 1), mul(params, float4(ray.origin, 1)));
         
         float discriminant = b * b - 4 * a * c;
         
@@ -78,13 +80,16 @@ struct Quadric {
         } else if (discriminant >= 0) {
             float root = sqrt(discriminant);
             float sol1 = (-b + root) / (2 * a), sol2 = (-b - root) / (2 * a);
-            float closest = sol1 < sol2 ? sol1 : sol2;
+            float closest = sol1 < 0 || sol1 > sol2 ? sol2 : sol1;
             
             if (closest >= 0 && !(closest >= intersection.t || closest <= EPSILON)) {
                 float3 position = ray.Extend(closest);
-                float nx = dot(position, params._11_12_23 + params._14);
-                float ny = dot(position.yxz, params._22_12_13 + params._24);
-                float nz = dot(position.xyx, params._33_13_23 + params._34);
+                float nx = mul(float4(2, 0, 0, 0), mul(params, float4(position, 1)));
+                float ny = mul(float4(0, 2, 0, 0), mul(params, float4(position, 1)));
+                float nz = mul(float4(0, 0, 2, 0), mul(params, float4(position, 1)));
+                //float nx = 2 * (dot(position, params._11_12_23) + params._14);
+                //float ny = 2 * (dot(position, params._21_22_23) + params._24);
+                //float nz = 2 * (dot(position, params._31_32_33) + params._34);
                 float3 normal = normalize(float3(nx, ny, nz));
                 intersection = GenerateIntersection(closest, normal, position, matId);
             }

@@ -3,9 +3,9 @@ using static Structs;
 using static SceneManager;
 
 public class Plane : Geometry<PlaneStruct> {
-    [SerializeField] private MatInfo mat1;
-    [SerializeField] private MatInfo mat2;
     public override PlaneStruct GetStruct() {
-        return new PlaneStruct(transform.position, transform.up, new(GetMatId(mat1), GetMatId(mat2)));
+        int mat1 = GetMatId(Mats[0]);
+        int mat2 = Mats.Length > 1 ? GetMatId(Mats[1]) : mat1;
+        return new PlaneStruct(transform.position, transform.up, new(mat1, mat2));
     }
 }

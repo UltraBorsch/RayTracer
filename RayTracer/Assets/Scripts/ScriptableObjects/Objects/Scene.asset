@@ -15,3 +15,5 @@ MonoBehaviour:
   Mats:
   - {fileID: 11400000, guid: 634f42e038cc7554db7b395f37b0771b, type: 2}
   - {fileID: 11400000, guid: f89fc664b2f4df847ba00710f70a470a, type: 2}
+  - {fileID: 11400000, guid: 4b7e4a4034b17d748bc333b22de2e85b, type: 2}
+  - {fileID: 11400000, guid: aa8bba8e929809f4d81755eef087eefb, type: 2}
