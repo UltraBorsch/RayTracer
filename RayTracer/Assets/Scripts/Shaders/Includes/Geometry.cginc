@@ -12,7 +12,7 @@ struct Sphere {
 
         float discriminant = b * b - 4 * c;
 
-        if (discriminant >= 0) {
+        if (discriminant >= EPSILON) {
             float root = sqrt(discriminant);
             //float t1 = (-b + root) / 2;
             float t2 = (-b - root) / 2;
@@ -63,34 +63,37 @@ struct Quadric {
     float4x4 params;
     int matId;
     
+    float3 GetNormal (float3 position) {
+        float4 v2 = mul(params, float4(position, 1));
+        float nx = dot(float4(2, 0, 0, 0), v2);
+        float ny = dot(float4(0, 2, 0, 0), v2);
+        float nz = dot(float4(0, 0, 2, 0), v2);
+        return normalize(float3(nx, ny, nz));
+    }
+    
     Intersection Intersect (Ray ray, Intersection intersection) {
         float3 d = ray.direction;
         
-        float a = mul(float4(ray.direction, 1), mul(params, float4(ray.direction, 1)));
-        float b = mul(float4(ray.origin, 1), mul(params, float4(ray.direction, 1))) + mul(float4(ray.direction, 1), mul(params, float4(ray.origin, 1)));
-        float c = mul(float4(ray.origin, 1), mul(params, float4(ray.origin, 1)));
+        float a = dot(float4(ray.direction, 1), mul(params, float4(ray.direction, 1)));
+        float b = dot(float4(ray.origin, 1), mul(params, float4(ray.direction, 1))) + dot(float4(ray.direction, 1), mul(params, float4(ray.origin, 1)));
+        float c = dot(float4(ray.origin, 1), mul(params, float4(ray.origin, 1)));
         
         float discriminant = b * b - 4 * a * c;
         
-        if (a == 0) {
+        if (a <= EPSILON) {
             float t = -c / b;
-            float3 normal = float3(0, 0, 0); //??????
             float3 position = ray.Extend(t);
+            float3 normal = GetNormal(position);
             intersection = GenerateIntersection(t, normal, position, matId);
-        } else if (discriminant >= 0) {
+        } else if (discriminant >= EPSILON) {
             float root = sqrt(discriminant);
             float sol1 = (-b + root) / (2 * a), sol2 = (-b - root) / (2 * a);
-            float closest = sol1 < 0 || sol1 > sol2 ? sol2 : sol1;
+            //float closest = sol1 < sol2 ? sol1 : sol2; //sol2 is always the correct solution for the elliptic cones, so assuming that carries for all quadrics
+            float closest = sol2;
             
             if (closest >= 0 && !(closest >= intersection.t || closest <= EPSILON)) {
                 float3 position = ray.Extend(closest);
-                float nx = mul(float4(2, 0, 0, 0), mul(params, float4(position, 1)));
-                float ny = mul(float4(0, 2, 0, 0), mul(params, float4(position, 1)));
-                float nz = mul(float4(0, 0, 2, 0), mul(params, float4(position, 1)));
-                //float nx = 2 * (dot(position, params._11_12_23) + params._14);
-                //float ny = 2 * (dot(position, params._21_22_23) + params._24);
-                //float nz = 2 * (dot(position, params._31_32_33) + params._34);
-                float3 normal = normalize(float3(nx, ny, nz));
+                float3 normal = GetNormal(position);
                 intersection = GenerateIntersection(closest, normal, position, matId);
             }
         }

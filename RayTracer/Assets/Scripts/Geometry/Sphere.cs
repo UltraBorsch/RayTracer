@@ -5,7 +5,7 @@ using static Structs;
 using static SceneManager;
 
 public class Sphere : Geometry<SphereStruct> {
-    public float radius;
+    [SerializeField] private float radius;
 
     public override SphereStruct GetStruct() {
         return new(radius, transform.position, GetMatId(Mats[0]));
