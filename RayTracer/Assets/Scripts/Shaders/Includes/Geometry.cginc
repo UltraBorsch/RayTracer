@@ -40,17 +40,16 @@ struct AABB {
         float3 normal;
         
         for (int i = 0; i < 3; i++) {
-            bool dsign = ray.direction[i] <= 0;
-            float bmin = corners[dsign][i];
-            float bmax = corners[!dsign][i];
+            float bmin = corners[ray.negativeDir[i]][i];
+            float bmax = corners[!ray.negativeDir[i]][i];
             
-            float dmin = (bmin - ray.origin[i]) / ray.direction[i];
-            float dmax = (bmax - ray.origin[i]) / ray.direction[i];
+            float dmin = (bmin - ray.origin[i]) * ray.invDirection[i];
+            float dmax = (bmax - ray.origin[i]) * ray.invDirection[i];
             
             tmin = max(dmin, tmin);
             tmax = min(dmax, tmax);
             if (tmin == dmin) {
-                normal = (dsign * 2 - 1) * normals[i];
+                normal = (ray.negativeDir[i] * 2 - 1) * normals[i];
                 mat = matId[i];
             }
         }
@@ -69,14 +68,14 @@ struct Plane {
     Intersection Intersect (Ray ray, Intersection intersection) {
         float denom = dot(normal, ray.direction);
         
-        if (denom >= 0)
+        if (denom >= -EPSILON)
             return intersection;
         
         float t = dot(coord - ray.origin, normal) / denom;
         if (t >= intersection.t || t <= EPSILON)
             return intersection;
         
-        float3 position = ray.origin + t * ray.direction;
+        float3 position = ray.Extend(t);
         int total = floor(position.x) + floor(position.z);
         
         return GenerateIntersection(t, normal, position, matId[total & 1]);
@@ -96,8 +95,6 @@ struct Quadric {
     }
     
     Intersection Intersect (Ray ray, Intersection intersection) {
-        float3 d = ray.direction;
-        
         float a = dot(float4(ray.direction, 1), mul(params, float4(ray.direction, 1)));
         float b = dot(float4(ray.origin, 1), mul(params, float4(ray.direction, 1))) + dot(float4(ray.direction, 1), mul(params, float4(ray.origin, 1)));
         float c = dot(float4(ray.origin, 1), mul(params, float4(ray.origin, 1)));
@@ -107,8 +104,7 @@ struct Quadric {
         if (a <= EPSILON) {
             float t = -c / b;
             float3 position = ray.Extend(t);
-            float3 normal = GetNormal(position);
-            intersection = GenerateIntersection(t, normal, position, matId);
+            intersection = GenerateIntersection(t, GetNormal(position), position, matId);
         } else if (discriminant >= EPSILON) {
             float root = sqrt(discriminant);
             float sol1 = (-b + root) / (2 * a), sol2 = (-b - root) / (2 * a);
@@ -117,8 +113,7 @@ struct Quadric {
             
             if (closest >= 0 && !(closest >= intersection.t || closest <= EPSILON)) {
                 float3 position = ray.Extend(closest);
-                float3 normal = GetNormal(position);
-                intersection = GenerateIntersection(closest, normal, position, matId);
+                intersection = GenerateIntersection(closest, GetNormal(position), position, matId);
             }
         }
 

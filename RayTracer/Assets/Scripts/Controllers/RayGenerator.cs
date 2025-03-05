@@ -88,7 +88,8 @@ public class RayGenerator : MonoBehaviour {
     private void SetRenderVars() {
         //static variables that shouldnt change during runtime (at least for the purpose of this application).
         //  resolution, the geometry buffers, the output image, ambient vars, etc
-        SetParam(rayTracer, resolution, "resolution");
+        float[] res = new[] { resolution.x, resolution.y, 1.0f / resolution.x, 1.0f / resolution.y };
+        SetParam(rayTracer, res, "resolution");
         rayTracer.SetTexture(0, "result", image);
 
         SetParam(rayTracer, lights.Length, "lightCount");

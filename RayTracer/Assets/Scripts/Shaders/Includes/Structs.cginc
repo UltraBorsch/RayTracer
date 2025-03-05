@@ -3,6 +3,8 @@
 struct Ray {
     float3 origin;
     float3 direction;
+    float3 invDirection;
+    bool3 negativeDir;
 
     float3 Extend (float t) {
         return origin + t * direction;
@@ -13,6 +15,8 @@ Ray GenerateRay (float3 o, float3 d) {
     Ray ray;
     ray.origin = o;
     ray.direction = d;
+    ray.invDirection = 1.0 / d;
+    ray.negativeDir = d < 0;
     return ray;
 }
 

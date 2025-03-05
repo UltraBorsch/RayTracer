@@ -4,7 +4,7 @@
 RWTexture2D<float4> result; //raytrace result
 
 //global variables that do not change
-uint2 resolution;
+float4 resolution; //.x and .y are the resolution, .z and .w are the correspondeg inverses
 float4 ambientColour;
 float ambientIntensity;
 
@@ -51,13 +51,14 @@ Intersection CheckIntersections (Ray ray) {
 
 [numthreads(32,32,1)]
 void TraceRays (uint3 id : SV_DispatchThreadID) {
-    if (id.x >= resolution.x || id.y >= resolution.y) return;
+    if (id.x >= (uint) resolution.x || id.y >= (uint) resolution.y)
+    return;
 
     float x = id.x + 0.5f;
     float y = id.y + 0.5f;
 
-    float su = left + (right - left) * x / resolution.x;
-    float sv = bottom + (top - bottom) * y / resolution.y;
+    float su = left + (right - left) * x * resolution.z;
+    float sv = bottom + (top - bottom) * y * resolution.w;
     float3 dir = normalize(su * u + sv * v - d * camDirection); 
 
     Ray ray = GenerateRay(camPosition, dir);
@@ -76,9 +77,9 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
              
             //check if point is in shadow
             //if not, lambertian, phong, attenuation, etc
-            Ray shadowRay = GenerateRay(intersection.position, lightDir);
+            Ray shadowRay = GenerateRay(intersection.position + EPSILON * -lightDir, lightDir);
             Intersection shadowIntersection = CheckIntersections(shadowRay);
-            float tl = (light.position - shadowRay.origin) / shadowRay.direction;
+            float tl = (light.position.x - shadowRay.origin.x) * shadowRay.invDirection.x;
             if (shadowIntersection.t <= tl)
                 continue;
             
