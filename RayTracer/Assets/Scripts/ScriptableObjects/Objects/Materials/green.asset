@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aca7b304b3bd27a49832ccffd3c9a58d, type: 3}
   m_Name: green
   m_EditorClassIdentifier: 
-  hardness: 0
-  diffuseColour: {r: 0, g: 0.735849, b: 0.07130218, a: 0}
+  hardness: 32
+  diffuseColour: {r: 0.003915994, g: 0.8301887, b: 0.083027154, a: 0}
   specularColour: {r: 0.6509434, g: 0.6509434, b: 0.6509434, a: 0}

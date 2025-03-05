@@ -1,6 +1,5 @@
-// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel TraceRays
-#include "Includes/Geometry.cginc" //already includes constants
+#include "Includes/Geometry.cginc" //already includes constants and structs
 
 RWTexture2D<float4> result; //raytrace result
 
@@ -41,6 +40,14 @@ int quadricCount;
 RWStructuredBuffer<AABB> boxes;
 int AABBCount;
 
+Intersection CheckIntersections (Ray ray) {
+    Intersection intersection = GenerateIntersection();
+    
+    intersection = CheckForIntersections(spheres, sphereCount, intersection, ray);
+    intersection = CheckForIntersections(planes, planeCount, intersection, ray);
+    intersection = CheckForIntersections(quadrics, quadricCount, intersection, ray);
+    return CheckForIntersections(boxes, AABBCount, intersection, ray);
+}
 
 [numthreads(32,32,1)]
 void TraceRays (uint3 id : SV_DispatchThreadID) {
@@ -54,12 +61,7 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
     float3 dir = normalize(su * u + sv * v - d * camDirection); 
 
     Ray ray = GenerateRay(camPosition, dir);
-    Intersection intersection = GenerateIntersection();
-    
-    intersection = CheckForIntersections(spheres, sphereCount, intersection, ray);
-    intersection = CheckForIntersections(planes, planeCount, intersection, ray);
-    intersection = CheckForIntersections(quadrics, quadricCount, intersection, ray);
-    intersection = CheckForIntersections(boxes, AABBCount, intersection, ray);
+    Intersection intersection = CheckIntersections(ray);
     
     float4 colour = float4(0, 0, 0, 1);
     if (intersection.t < INF) {
@@ -71,8 +73,15 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
                 lightDir = -light.direction; 
             else
                 lightDir = normalize(light.position - intersection.position);
-                        //check if point is in shadow
-                        //if not, lambertian, phong, attenuation, etc
+             
+            //check if point is in shadow
+            //if not, lambertian, phong, attenuation, etc
+            Ray shadowRay = GenerateRay(intersection.position, lightDir);
+            Intersection shadowIntersection = CheckIntersections(shadowRay);
+            float tl = (light.position - shadowRay.origin) / shadowRay.direction;
+            if (shadowIntersection.t <= tl)
+                continue;
+            
             float4 lambertian = light.intensity * light.lightColour * mat.diffuseColour * max(0, dot(intersection.normal, lightDir));
 
             float3 h = normalize(-dir + lightDir);
