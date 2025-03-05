@@ -24,4 +24,5 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
     * Spatial hashing/ray marching.
     * Culling, probably by giving every geometry a bounding box.
 # Known Issues
-   * Bugs with some quadrics. Notably, elliptic cones are fine but ellipsoids are not.
+   * Bugs with some quadrics. Notably, elliptic cones clearly work but ellipsoids do not look like ellipsoids.
+   * Potential visual bug with AABBs. Certain faces sometimes stop rendering at certain angles. I have noticed it specifically with the faces perpendicular to the y-axis, but does not happen always.
