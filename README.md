@@ -8,7 +8,8 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 * Code in complex shapes (meshes, hierarchies, constructive geometry, etc).
     * Asserting that said shapes conform, e.g. generating normals when meshes do not provide them, no trailing vertices, etc.
 * Transformation matrices for all applicable shapes.
-* Additional features (some of which may already be done):
+* Additional features:
+    * Shadows.
     * Anti-Aliasing/super sampling (uniform grid, stochastic pattern, adaptive, jittering).
     * Mirror/fresnel reflection.
     * Refraction.
