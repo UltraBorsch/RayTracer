@@ -1,4 +1,6 @@
 #include "Structs.cginc"
+// Upgrade NOTE: excluded shader from OpenGL ES 2.0 because it uses non-square matrices
+#pragma exclude_renderers gles
 
 struct Sphere {
     float radius;
@@ -27,13 +29,35 @@ struct Sphere {
 };
 
 struct AABB {
-    float3 center;
-    float width, height, length;
+    float2x3 corners;
     int matId[3];
     
     Intersection Intersect (Ray ray, Intersection intersection) {
-
-        return intersection;
+        float tmin = 0;
+        float tmax = intersection.t;
+        float mat;
+        float3x3 normals = { float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1) };
+        float3 normal;
+        
+        for (int i = 0; i < 3; i++) {
+            bool dsign = ray.direction[i] <= 0;
+            float bmin = corners[dsign][i];
+            float bmax = corners[!dsign][i];
+            
+            float dmin = (bmin - ray.origin[i]) / ray.direction[i];
+            float dmax = (bmax - ray.origin[i]) / ray.direction[i];
+            
+            tmin = max(dmin, tmin);
+            tmax = min(dmax, tmax);
+            if (tmin == dmin) {
+                normal = (dsign * 2 - 1) * normals[i];
+                mat = matId[i];
+            }
+        }
+        
+        if (tmin > tmax || tmin <= EPSILON)
+            return intersection;
+        return GenerateIntersection(tmin, normal, ray.Extend(tmin), mat);
     }
 };
 

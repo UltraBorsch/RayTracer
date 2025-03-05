@@ -38,6 +38,9 @@ int planeCount;
 RWStructuredBuffer<Quadric> quadrics;
 int quadricCount;
 
+RWStructuredBuffer<AABB> boxes;
+int AABBCount;
+
 
 [numthreads(32,32,1)]
 void TraceRays (uint3 id : SV_DispatchThreadID) {
@@ -56,6 +59,7 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
     intersection = CheckForIntersections(spheres, sphereCount, intersection, ray);
     intersection = CheckForIntersections(planes, planeCount, intersection, ray);
     intersection = CheckForIntersections(quadrics, quadricCount, intersection, ray);
+    intersection = CheckForIntersections(boxes, AABBCount, intersection, ray);
     
     float4 colour = float4(0, 0, 0, 1);
     if (intersection.t < INF) {

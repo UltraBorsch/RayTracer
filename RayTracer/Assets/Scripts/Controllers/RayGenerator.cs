@@ -21,10 +21,12 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private Sphere[] spheres;
     [SerializeField] private Plane[] planes;
     [SerializeField] private Quadric[] quadrics;
+    [SerializeField] private AABB[] boxes;
 
     [SerializeField] private Sphere dummySphere;
     [SerializeField] private Plane dummyPlane;
     [SerializeField] private Quadric dummyQuadric;
+    [SerializeField] private AABB dummyAABB;
 
     private void Awake() {
         SetupScene(sceneInfo);
@@ -94,14 +96,17 @@ public class RayGenerator : MonoBehaviour {
         SetParam(rayTracer, spheres.Length, "sphereCount");
         SetParam(rayTracer, planes.Length, "planeCount");
         SetParam(rayTracer, quadrics.Length, "quadricCount");
+        SetParam(rayTracer, boxes.Length, "AABBCount");
 
         spheres = spheres.Length == 0 ? new[] { dummySphere } : spheres;
         planes = planes.Length == 0 ? new[] { dummyPlane } : planes;
         quadrics = quadrics.Length == 0 ? new[] { dummyQuadric } : quadrics;
+        boxes = boxes.Length == 0 ? new[] { dummyAABB } : boxes;
 
         CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
         CreateAndSetBuffer(rayTracer, "TraceRays", "planes", planes);
         CreateAndSetBuffer(rayTracer, "TraceRays", "quadrics", quadrics);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "boxes", boxes);
         CreateAndSetBuffer(rayTracer, "TraceRays", "mats", Mats);
         CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lights);
         

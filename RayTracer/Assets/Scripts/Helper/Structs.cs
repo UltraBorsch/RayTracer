@@ -1,4 +1,5 @@
 using UnityEngine;
+using static ComputeStructs;
 
 public static class Structs {
     public struct Mat {
@@ -44,12 +45,12 @@ public static class Structs {
     public struct PlaneStruct {
         public Vector3 coord;
         public Vector3 normal;
-        public Vector2Int matId;
+        public Vector2Int matIds;
 
-        public PlaneStruct(Vector3 coord, Vector3 normal, Vector2Int matId) {
+        public PlaneStruct(Vector3 coord, Vector3 normal, Vector2Int matIds) {
             this.coord = coord;
             this.normal = normal;
-            this.matId = matId;
+            this.matIds = matIds;
         }
     }
 
@@ -60,6 +61,17 @@ public static class Structs {
         public QuadricStruct(Matrix4x4 parameters, int matId) {
             this.parameters = parameters;
             this.matId = matId;
+        }
+    }
+
+    public struct AABBStruct {
+        public Matrix2x3 corners;
+        public Vector3Int matIds;
+
+        //NOTE: it seems unity/hlsl fills matrices by columns. This is why the placement of the corners in the matrix seems odd.
+        public AABBStruct(Vector3 minPos, Vector3 maxPos, Vector3Int matIds) {
+            corners = new(minPos, maxPos);
+            this.matIds = matIds;
         }
     }
 }
