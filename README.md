@@ -4,7 +4,7 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 
 # TODO
 * General refactoring is much needed.
-* Code in more standardized shapes (cubes, implicits, bezier surface patches, etc).
+* Code in more standardized shapes (implicits, bezier surface patches, etc).
 * Code in complex shapes (meshes, hierarchies, constructive geometry, etc).
     * Asserting that said shapes conform, e.g. generating normals when meshes do not provide them, no trailing vertices, etc.
 * Transformation matrices for all applicable shapes.
