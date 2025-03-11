@@ -1,6 +1,8 @@
 static float PI = 3.14159;
 static float EPSILON = 0.0001;
 static float INF = 3.402823466e+38F;
+static float PRECISION = 1000000;
+static float PRECISION_INV = 1.0 / PRECISION;
 static float COS45 = cos(PI / 4);
 static float SIN45 = sin(PI / 4);
 static float ATANHALF = atan(1 / 2);

@@ -251,7 +251,7 @@ MonoBehaviour:
   sceneInfo: {fileID: 11400000, guid: 6349e7fe56bd55146979e804ce47c76c, type: 2}
   cam: {fileID: 963194227}
   camController: {fileID: 963194232}
-  resolution: {x: 420, y: 420}
+  resolution: {x: 420, y: 240}
   aspect: 0
   image: {fileID: 0}
   empty: {fileID: 0}
@@ -262,7 +262,7 @@ MonoBehaviour:
   useScreenResolution: 1
   ambientColour: {r: 0.2264151, g: 0.2264151, b: 0.2264151, a: 0}
   ambientIntensity: 0.2
-  samples: 8
+  samples: 4
   rayTracer: {fileID: 7200000, guid: 26982570525b2804198c54c1fbdc9949, type: 3}
   spheres:
   - {fileID: 985692775}

@@ -59,6 +59,11 @@ public static class ComputeHelper {
         return new((int)x, (int)y, (int)z);
     }
 
+    public static void SetBuffer(ComputeShader shader, string kernel, string BufferName, ComputeBuffer buffer) {
+        shader.SetBuffer(shader.FindKernel(kernel), BufferName, buffer);
+        //createdBuffers.Add(buffer);
+    }
+
     /// <summary> Creates and returns a buffer from basic data. </summary>
     public static ComputeBuffer CreateAndSetBuffer<T>(ComputeShader shader, string kernel, string BufferName, int size) {
         ComputeBuffer buffer = CreateBuffer<T>(size);

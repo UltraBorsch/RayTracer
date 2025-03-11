@@ -86,6 +86,7 @@ public class RayGenerator : MonoBehaviour {
 
         CopyRenderTexture(empty, image);
         Run(rayTracer, "TraceRays", resolution.x, resolution.y, (int)(samples * samples));
+        Run(rayTracer, "CorrectImage", resolution.x, resolution.y);
     }
     
     private void SetRenderVars() {
@@ -93,7 +94,8 @@ public class RayGenerator : MonoBehaviour {
         //  resolution, the geometry buffers, the output image, ambient vars, etc
         float[] res = new[] { resolution.x, resolution.y, 1.0f / resolution.x, 1.0f / resolution.y };
         SetParam(rayTracer, res, "resolution");
-        rayTracer.SetTexture(0, "result", image);
+        //rayTracer.SetTexture(0, "result", image);
+        rayTracer.SetTexture(1, "result", image);
 
         SetParam(rayTracer, lights.Length, "lightCount");
         SetParam(rayTracer, Mats.Length, "matCount");
@@ -113,7 +115,12 @@ public class RayGenerator : MonoBehaviour {
         CreateAndSetBuffer(rayTracer, "TraceRays", "boxes", boxes);
         CreateAndSetBuffer(rayTracer, "TraceRays", "mats", Mats);
         CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lights);
-        
+
+        int AABufferCount = (int)(resolution.x * resolution.y * samples * samples);
+        ComputeBuffer AABuffer = CreateBuffer<Vector4>(AABufferCount);
+        SetBuffer(rayTracer, "TraceRays", "AAResults", AABuffer);
+        SetBuffer(rayTracer, "CorrectImage", "AAResults", AABuffer);
+
         SetParam(rayTracer, ambientIntensity, "ambientIntensity");
         SetParam(rayTracer, ambientColour, "ambientColour");
 
