@@ -254,6 +254,7 @@ MonoBehaviour:
   resolution: {x: 420, y: 420}
   aspect: 0
   image: {fileID: 0}
+  empty: {fileID: 0}
   lights:
   - {fileID: 793858672}
   - {fileID: 1652536778}
@@ -261,6 +262,7 @@ MonoBehaviour:
   useScreenResolution: 1
   ambientColour: {r: 0.2264151, g: 0.2264151, b: 0.2264151, a: 0}
   ambientIntensity: 0.2
+  samples: 8
   rayTracer: {fileID: 7200000, guid: 26982570525b2804198c54c1fbdc9949, type: 3}
   spheres:
   - {fileID: 985692775}
@@ -1032,11 +1034,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9073595023505786299, guid: 7170e60c5be624b4e885cc04e171e4bf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.03
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9073595023505786299, guid: 7170e60c5be624b4e885cc04e171e4bf, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.99
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9073595023505786299, guid: 7170e60c5be624b4e885cc04e171e4bf, type: 3}
       propertyPath: m_LocalPosition.z

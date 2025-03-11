@@ -1,3 +1,10 @@
 static float PI = 3.14159;
 static float EPSILON = 0.0001;
 static float INF = 3.402823466e+38F;
+static float COS45 = cos(PI / 4);
+static float SIN45 = sin(PI / 4);
+static float ATANHALF = atan(1 / 2);
+static float COS26 = cos(PI / 4);
+static float SIN26 = sin(PI / 4);
+static float2x2 ROTATE45 = float2x2(float2(COS45, -SIN45), float2(SIN45, COS45));
+static float2x2 ROTATE26 = float2x2(float2(COS26, -SIN26), float2(SIN26, COS26));

@@ -21,6 +21,7 @@ float left;
 float3 u;
 float3 v;
 
+float samples, sampleInv, nextSampleInv, sampleSquare, sampleSquareInv; //.x is length of a sample square (so 2 = 2*2 samples), .y is inverse of sample, .z is sample*sample, .w is inverse of sample + 1 (so 1/3)
 
 RWStructuredBuffer<Light> lights;
 int lightCount;
@@ -49,17 +50,23 @@ Intersection CheckIntersections (Ray ray) {
     return CheckForIntersections(boxes, AABBCount, intersection, ray);
 }
 
-[numthreads(32,32,1)]
+//Note, product must be <= 1024
+[numthreads(16, 16, 1)]
 void TraceRays (uint3 id : SV_DispatchThreadID) {
-    if (id.x >= (uint) resolution.x || id.y >= (uint) resolution.y)
-    return;
+    if (id.x >= (uint) resolution.x || id.y >= (uint) resolution.y || (uint) id.z >= sampleSquare)  return;
+    
+    float2 sample = float2(id.z % samples, (int) (id.z * sampleInv)) + 1;
+    sample = sample * nextSampleInv - 0.5;
+    sample = mul(ROTATE26, sample);
+    sample += id.xy + 0.5;
+    
+    //keep sample within current pixel
+    sample.x = max(min(id.x + 1, sample.x), id.x);
+    sample.y = max(min(id.y + 1, sample.y), id.y);
 
-    float x = id.x + 0.5f;
-    float y = id.y + 0.5f;
-
-    float su = left + (right - left) * x * resolution.z;
-    float sv = bottom + (top - bottom) * y * resolution.w;
-    float3 dir = normalize(su * u + sv * v - d * camDirection); 
+    float su = left + (right - left) * sample.x * resolution.z;
+    float sv = bottom + (top - bottom) * sample.y * resolution.w;
+    float3 dir = normalize(su * u + sv * v - d * camDirection);
 
     Ray ray = GenerateRay(camPosition, dir);
     Intersection intersection = CheckIntersections(ray);
@@ -71,8 +78,7 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
             Light light = lights[i];
             float3 lightDir;
             if (light.directional)
-                lightDir = -light.direction; 
-            else
+                lightDir = -light.direction; else
                 lightDir = normalize(light.position - intersection.position);
              
             //check if point is in shadow
@@ -91,7 +97,8 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
             colour += lambertian + bp;
         }
 
-        colour += ambientIntensity * ambientColour;        
+        colour += ambientIntensity * ambientColour;
     }
-    result[id.xy] = colour;
+
+    result[id.xy] += colour * sampleSquareInv;
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
@@ -34,6 +35,7 @@ public static class ComputeHelper {
         switch (value) {
             case int i: shader.SetInt(valueName, i); break;
             case float f: shader.SetFloat(valueName, f); break;
+            case double d: shader.SetFloat(valueName, (float)d); break;
             case bool b: shader.SetBool(valueName, b); break;
             case Vector2 v2: shader.SetVector(valueName, v2); break;
             case Vector3 v3: shader.SetVector(valueName, v3); break;
@@ -42,6 +44,7 @@ public static class ComputeHelper {
             case Matrix4x4 m: shader.SetMatrix(valueName, m); break;
             case int[] iarr: shader.SetInts(valueName, iarr); break;
             case float[] farr: shader.SetFloats(valueName, farr); break;
+            case double[] darr: shader.SetFloats(valueName, darr.Select(d => (float)d).ToArray()); break;
             case Vector4[] varr: shader.SetVectorArray(valueName, varr); break;
             case Matrix4x4[] marr: shader.SetMatrixArray(valueName, marr); break;
             case Vector2Int iv2: shader.SetInts(valueName, new[] {iv2.x, iv2.y }); break;

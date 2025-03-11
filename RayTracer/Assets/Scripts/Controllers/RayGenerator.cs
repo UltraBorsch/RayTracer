@@ -10,12 +10,13 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private CameraController camController;
     [SerializeField] private Vector2Int resolution;
     [SerializeField] private float aspect;
-    [SerializeField] private RenderTexture image; //make rendertexture for to use in shader?
+    [SerializeField] private RenderTexture image, empty;
     [SerializeField] private RayTracerLight[] lights;
     [SerializeField] private Vector3? prevPos = null, prevFor = null;
     [SerializeField] private bool useRayTracing, useScreenResolution;
     [SerializeField] private Color ambientColour;
     [SerializeField] private float ambientIntensity;
+    [SerializeField] private float samples;
 
     [SerializeField] private ComputeShader rayTracer;
     [SerializeField] private Sphere[] spheres;
@@ -39,6 +40,7 @@ public class RayGenerator : MonoBehaviour {
         }
 
         image = TextureFactory(resolution);
+        empty = TextureFactory(resolution);
         aspect = resolution.x / resolution.y;
 
         camController.useRayTracing = useRayTracing;
@@ -82,7 +84,8 @@ public class RayGenerator : MonoBehaviour {
         if (prevPos != cam.transform.position)
             SetParam(rayTracer, cam.transform.position, "camPosition");
 
-        Run(rayTracer, "TraceRays", resolution.x, resolution.y);
+        CopyRenderTexture(empty, image);
+        Run(rayTracer, "TraceRays", resolution.x, resolution.y, (int)(samples * samples));
     }
     
     private void SetRenderVars() {
@@ -113,5 +116,11 @@ public class RayGenerator : MonoBehaviour {
         
         SetParam(rayTracer, ambientIntensity, "ambientIntensity");
         SetParam(rayTracer, ambientColour, "ambientColour");
+
+        SetParam(rayTracer, samples, "samples");
+        SetParam(rayTracer, 1f / samples, "sampleInv");
+        SetParam(rayTracer, 1f / (samples + 1), "nextSampleInv");
+        SetParam(rayTracer, samples * samples, "sampleSquare");
+        SetParam(rayTracer, 1f / (samples * samples), "sampleSquareInv");
     }
 }
