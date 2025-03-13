@@ -1,13 +1,17 @@
 #pragma kernel TraceRays
 #pragma kernel CorrectImage
+#pragma kernel AAReduction
+
 #include "Includes/Geometry.cginc" //already includes constants and structs
 
-RWTexture2D<float4> result; //raytrace result
-
 //global variables that do not change
-float4 resolution; //.x and .y are the resolution, .z and .w are the correspondeg inverses
 float4 ambientColour;
 float ambientIntensity;
+
+RWTexture2D<float4> result; //raytrace result
+float4 resolution; //.x and .y are the resolution, .z and .w are the correspondeg inverses
+float samples, sampleInv, nextSampleInv, sampleSquare, sampleSquareInv;
+RWStructuredBuffer<float4> AAResults;
 
 //d is (i think) focal length. near/far planes not considered yet
 float3 camDirection; //direction TO cam, not direction cam is facing
@@ -21,9 +25,6 @@ float bottom;
 float left;
 float3 u;
 float3 v;
-
-float samples, sampleInv, nextSampleInv, sampleSquare, sampleSquareInv;
-RWStructuredBuffer<float4> AAResults;
 
 RWStructuredBuffer<Light> lights;
 int lightCount;
@@ -114,4 +115,21 @@ void CorrectImage (uint3 id : SV_DispatchThreadID) {
     int i = id.y * resolution.x * sampleSquare + id.x * sampleSquare;
     for (int z = 0; z < sampleSquare; z++)
         result[id.xy] += AAResults[i + z];
+}
+
+[numthreads(1, 1, 64)]
+void AAReduction (uint3 id : SV_DispatchThreadID) {
+    if (id.x >= (uint) resolution.x || id.y >= (uint) resolution.y || id.z > (uint) (sampleSquare * 0.5)) return;
+    int i = id.y * resolution.x * sampleSquare + id.x * sampleSquare + id.z;
+    
+    float next = (int) (sampleSquare * 0.5);
+    
+    while ((uint) next > id.z) {
+        AAResults[i] += AAResults[i + next];
+        next = next * 0.5;
+        GroupMemoryBarrierWithGroupSync();
+    }
+    
+    if (id.z == 0)
+        result[id.xy] = AAResults[i];
 }

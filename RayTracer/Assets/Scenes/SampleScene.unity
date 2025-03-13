@@ -251,7 +251,7 @@ MonoBehaviour:
   sceneInfo: {fileID: 11400000, guid: 6349e7fe56bd55146979e804ce47c76c, type: 2}
   cam: {fileID: 963194227}
   camController: {fileID: 963194232}
-  resolution: {x: 420, y: 240}
+  resolution: {x: 240, y: 240}
   aspect: 0
   image: {fileID: 0}
   empty: {fileID: 0}
