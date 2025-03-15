@@ -61,7 +61,8 @@ public static class ComputeHelper {
 
     public static void SetBuffer(ComputeShader shader, string kernel, string BufferName, ComputeBuffer buffer) {
         shader.SetBuffer(shader.FindKernel(kernel), BufferName, buffer);
-        //createdBuffers.Add(buffer);
+        if (!createdBuffers.Contains(buffer))
+            createdBuffers.Add(buffer);
     }
 
     /// <summary> Creates and returns a buffer from basic data. </summary>
@@ -96,7 +97,8 @@ public static class ComputeHelper {
     /// <summary> Create a buffer of a given size of type T. </summary>
     public static ComputeBuffer CreateBuffer<T>(int size) {
         ComputeBuffer buffer = new(size, System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)));
-        createdBuffers.Add(buffer);
+        if (!createdBuffers.Contains(buffer))
+            createdBuffers.Add(buffer);
         return buffer;
     }
 

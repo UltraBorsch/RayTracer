@@ -7,7 +7,7 @@ public class Quadric : Geometry<QuadricStruct> {
     [SerializeField] private float constant;
 
     public override QuadricStruct GetStruct() {
-        return new QuadricStruct(GetMatrix(), GetMatId(Mats[0]));
+        return new QuadricStruct(GetMatrix(), Mats.Length == 0 ? 0 : GetMatId(Mats[0]));
     }
 
     private Matrix4x4 GetMatrix() {
