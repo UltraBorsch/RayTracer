@@ -2,84 +2,23 @@
 // Upgrade NOTE: excluded shader from OpenGL ES 2.0 because it uses non-square matrices
 #pragma exclude_renderers gles
 
+static float3x3 axisNormals = { float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1) };
+
 struct Sphere {
     float radius;
     float3 center;
     int matId;
-    
-    Intersection Intersect (Ray ray, Intersection intersection) {
-        float b = 2 * dot(ray.direction, ray.origin - center);
-        float3 vec = ray.origin - center;
-        float c = dot(vec, vec) - radius * radius;
-
-        float discriminant = b * b - 4 * c;
-
-        if (discriminant >= EPSILON) {
-            float root = sqrt(discriminant);
-            //float t1 = (-b + root) / 2;
-            float t2 = (-b - root) / 2;
-
-            if (!(t2 >= intersection.t || t2 <= EPSILON)) {
-                float3 normal = normalize(ray.Extend(t2) - center);
-                intersection = GenerateIntersection(t2, normal, ray.Extend(t2), matId);
-            }
-        }
-        return intersection;
-    }
 };
 
 struct AABB {
     float2x3 corners;
     int matId[3];
-    
-    Intersection Intersect (Ray ray, Intersection intersection) {
-        float tmin = 0;
-        float tmax = intersection.t;
-        float mat;
-        float3x3 normals = { float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1) };
-        float3 normal;
-        
-        for (int i = 0; i < 3; i++) {
-            float bmin = corners[ray.negativeDir[i]][i];
-            float bmax = corners[!ray.negativeDir[i]][i];
-            
-            float dmin = (bmin - ray.origin[i]) * ray.invDirection[i];
-            float dmax = (bmax - ray.origin[i]) * ray.invDirection[i];
-            
-            tmin = max(dmin, tmin);
-            tmax = min(dmax, tmax);
-            if (tmin == dmin) {
-                normal = (ray.negativeDir[i] * 2 - 1) * normals[i];
-                mat = matId[i];
-            }
-        }
-        
-        if (tmin > tmax || tmin <= EPSILON)
-            return intersection;
-        return GenerateIntersection(tmin, normal, ray.Extend(tmin), mat);
-    }
 };
 
 struct Plane {
     float3 coord;
     float3 normal;
     int2 matId;
-    
-    Intersection Intersect (Ray ray, Intersection intersection) {
-        float denom = dot(normal, ray.direction);
-        
-        if (denom >= -EPSILON)
-            return intersection;
-        
-        float t = dot(coord - ray.origin, normal) / denom;
-        if (t >= intersection.t || t <= EPSILON)
-            return intersection;
-        
-        float3 position = ray.Extend(t);
-        int total = floor(position.x) + floor(position.z);
-        
-        return GenerateIntersection(t, normal, position, matId[total & 1]);
-    }
 };
 
 struct Quadric {
@@ -93,54 +32,114 @@ struct Quadric {
         float nz = dot(float4(0, 0, 2, 0), v2);
         return normalize(float3(nx, ny, nz));
     }
-    
-    Intersection Intersect (Ray ray, Intersection intersection) {
-        float a = dot(float4(ray.direction, 1), mul(params, float4(ray.direction, 1)));
-        float b = dot(float4(ray.origin, 1), mul(params, float4(ray.direction, 1))) + dot(float4(ray.direction, 1), mul(params, float4(ray.origin, 1)));
-        float c = dot(float4(ray.origin, 1), mul(params, float4(ray.origin, 1)));
-        
-        float discriminant = b * b - 4 * a * c;
-        
-        if (a <= EPSILON) {
-            float t = -c / b;
-            float3 position = ray.Extend(t);
-            intersection = GenerateIntersection(t, GetNormal(position), position, matId);
-        } else if (discriminant >= EPSILON) {
-            float root = sqrt(discriminant);
-            float sol1 = (-b + root) / (2 * a), sol2 = (-b - root) / (2 * a);
-            //float closest = sol1 < sol2 ? sol1 : sol2; //sol2 is always the correct solution for the elliptic cones, so assuming that carries for all quadrics
-            float closest = sol2;
-            
-            if (closest >= 0 && !(closest >= intersection.t || closest <= EPSILON)) {
-                float3 position = ray.Extend(closest);
-                intersection = GenerateIntersection(closest, GetNormal(position), position, matId);
-            }
-        }
-
-        return intersection;
-    }
 };
 
 Intersection CheckForIntersections (RWStructuredBuffer<Sphere> objs, int count, Intersection intersection, Ray ray) {
-    for (int i = 0; i < count; i++) 
-        intersection = objs[i].Intersect(ray, intersection);
+    float b, c, discriminant, root, t2;
+    float3 vec, normal;
+    for (int i = 0; i < count; i++) {
+        Sphere sphere = objs[i];
+        b = 2 * dot(ray.direction, ray.origin - sphere.center);
+        vec = ray.origin - sphere.center;
+        c = dot(vec, vec) - sphere.radius * sphere.radius;
+
+        discriminant = b * b - 4 * c;
+
+        if (discriminant >= EPSILON) {
+            root = sqrt(discriminant);
+            //float t1 = (-b + root) / 2;
+            t2 = (-b - root) * 0.5;
+            
+            if (!(t2 >= intersection.t || t2 <= EPSILON)) {
+                normal = normalize(ray.Extend(t2) - sphere.center);
+                intersection = GenerateIntersection(t2, normal, ray.Extend(t2), sphere.matId);
+            }
+        }
+    }
     return intersection;
 }
 
 Intersection CheckForIntersections (RWStructuredBuffer<AABB> objs, int count, Intersection intersection, Ray ray) {
-    for (int i = 0; i < count; i++) 
-        intersection = objs[i].Intersect(ray, intersection);
+    float tmin, tmax, mat, bmin, bmax, dmin, dmax;
+    float3 normal;
+    
+    for (int j = 0; j < count; j++) {
+        AABB box = objs[j];
+        
+        tmin = 0;
+        tmax = intersection.t;
+        
+        for (int i = 0; i < 3; i++) {
+            bmin = box.corners[ray.negativeDir[i]][i];
+            bmax = box.corners[!ray.negativeDir[i]][i];
+            
+            dmin = (bmin - ray.origin[i]) * ray.invDirection[i];
+            dmax = (bmax - ray.origin[i]) * ray.invDirection[i];
+            
+            tmin = max(dmin, tmin);
+            tmax = min(dmax, tmax);
+            if (tmin == dmin) {
+                normal = (ray.negativeDir[i] * 2 - 1) * axisNormals[i];
+                mat = box.matId[i];
+            }
+        }
+        
+        if (!(tmin > tmax || tmin <= EPSILON))
+            intersection = GenerateIntersection(tmin, normal, ray.Extend(tmin), mat);
+    }
+        
     return intersection;
 }
 
 Intersection CheckForIntersections (RWStructuredBuffer<Plane> objs, int count, Intersection intersection, Ray ray) {
-    for (int i = 0; i < count; i++) 
-        intersection = objs[i].Intersect(ray, intersection);
+    float t, denom;
+    int total;
+    float3 position;
+    for (int i = 0; i < count; i++) {
+        Plane plane = objs[i];
+
+        denom = dot(plane.normal, ray.direction);
+        t = dot(plane.coord - ray.origin, plane.normal) / denom;
+        
+        if (denom < -EPSILON && !(t > intersection.t || t <= EPSILON)) {
+            position = ray.Extend(t);
+            total = floor(position.x) + floor(position.z);
+        
+            intersection = GenerateIntersection(t, plane.normal, position, plane.matId[total & 1]);
+        }
+    }
+
     return intersection;
 }
 
 Intersection CheckForIntersections (RWStructuredBuffer<Quadric> objs, int count, Intersection intersection, Ray ray) {
-    for (int i = 0; i < count; i++) 
-        intersection = objs[i].Intersect(ray, intersection);
+    float a, b, c, t, discriminant, root, sol1, sol2, closest;
+    float3 position;
+    for (int i = 0; i < count; i++) {
+        Quadric quad = objs[i];
+        a = dot(float4(ray.direction, 1), mul(quad.params, float4(ray.direction, 1)));
+        b = dot(float4(ray.origin, 1), mul(quad.params, float4(ray.direction, 1))) + dot(float4(ray.direction, 1), mul(quad.params, float4(ray.origin, 1)));
+        c = dot(float4(ray.origin, 1), mul(quad.params, float4(ray.origin, 1)));
+        
+        discriminant = b * b - 4 * a * c;
+        
+        if (a <= EPSILON) {
+            t = -c / b;
+            position = ray.Extend(t);
+            intersection = GenerateIntersection(t, quad.GetNormal(position), position, quad.matId);
+        } else if (discriminant >= EPSILON) {
+            root = sqrt(discriminant);
+            sol1 = (-b + root) / (2 * a);
+            sol2 = (-b - root) / (2 * a);
+            //float closest = sol1 < sol2 ? sol1 : sol2; //sol2 is always the correct solution for the elliptic cones, so assuming that carries for all quadrics
+            closest = sol2;
+            
+            if (closest >= 0 && !(closest >= intersection.t || closest <= EPSILON)) {
+                position = ray.Extend(closest);
+                intersection = GenerateIntersection(closest, quad.GetNormal(position), position, quad.matId);
+            }
+        }
+    }
+    
     return intersection;
 }
