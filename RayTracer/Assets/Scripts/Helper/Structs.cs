@@ -18,15 +18,16 @@ public static class Structs {
         public float intensity;
         public int directional;
         public Color lightColour;
-        public Vector3 direction;
-        public Vector3 position;
+        public Vector3 direction, position;
+        public Vector3 attenuation;
 
-        public LightInfo(float intensity, bool directional, Color lightColour, Vector3 direction, Vector3 position) {
+        public LightInfo(float intensity, bool directional, Color lightColour, Vector3 direction, Vector3 position, Vector3 attenuation) {
             this.intensity = intensity;
             this.directional = directional ? 1 : 0;
             this.lightColour = lightColour;
             this.direction = direction;
             this.position = position;
+            this.attenuation = attenuation;
         }
     }
 

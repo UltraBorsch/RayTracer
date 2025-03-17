@@ -9,6 +9,13 @@ struct Ray {
     float3 Extend (float t) {
         return origin + t * direction;
     }
+    
+    void Set (float3 o, float3 d) {
+        origin = o;
+        direction = d;
+        invDirection = 1.0 / d;
+        negativeDir = d < 0;
+    }
 };
 
 Ray GenerateRay (float3 o, float3 d) {
@@ -25,6 +32,10 @@ struct Intersection {
     float3 normal;
     float3 position;
     int matId;
+    
+    void Reset () {
+        t = INF;
+    }
 };
 
 Intersection GenerateIntersection (float t, float3 normal, float3 position, int matId) {
@@ -50,6 +61,6 @@ struct Light {
     float intensity;
     int directional;
     float4 lightColour;
-    float3 direction;
-    float3 position;
+    float3 direction, position;
+    float3 attenuation;
 };

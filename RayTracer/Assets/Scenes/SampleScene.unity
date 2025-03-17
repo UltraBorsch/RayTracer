@@ -256,8 +256,8 @@ MonoBehaviour:
   image: {fileID: 0}
   empty: {fileID: 0}
   lights:
-  - {fileID: 793858672}
   - {fileID: 1652536778}
+  - {fileID: 793858672}
   useRayTracing: 1
   useScreenResolution: 1
   ambientColour: {r: 0.2264151, g: 0.2264151, b: 0.2264151, a: 0}
@@ -642,6 +642,18 @@ PrefabInstance:
       propertyPath: light
       value: 
       objectReference: {fileID: 1652536779}
+    - target: {fileID: 4883050484208944930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
+      propertyPath: attenuation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4883050484208944930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
+      propertyPath: attenuation.y
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 4883050484208944930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
+      propertyPath: attenuation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8353546690853261930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -1113,6 +1125,14 @@ PrefabInstance:
       propertyPath: light
       value: 
       objectReference: {fileID: 793858673}
+    - target: {fileID: 4883050484208944930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
+      propertyPath: attenuation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4883050484208944930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
+      propertyPath: attenuation.y
+      value: 0.01
+      objectReference: {fileID: 0}
     - target: {fileID: 8353546690853261930, guid: 3ca728b11f6548a43bab1942d32319eb, type: 3}
       propertyPath: m_RootOrder
       value: 2

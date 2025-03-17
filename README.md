@@ -1,4 +1,6 @@
 # RayTracer
+A fairly simply ray tracer using C#/HLSL/Unity.
+
 Inspiration taken from Sebastian Lague's and Acerola's videos regarding the same topic, and to an extent a similarly themed class assignment.\
 Although, I add my own twists, with the end goal for this to be a standalone creation.
 
@@ -7,6 +9,7 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 * Rotated grid super sampling anti-aliasing.
 * Shadows.
 * SSAA.
+* Basic light attenuation.
 
 # TODO
 * General refactoring is much needed.
@@ -16,7 +19,7 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 * Transformation matrices for applicable geometry types (notably not spheres and planes).
 * Bounds for certain geometry (could possibly use for all geometry types, but in particular for planes and quadrics so that they're not infinite).
 * Additional features:
-    * Light attenuation.
+    * More complex/efficient light attenuation;
     * More Anti-Aliasing options (jittering, post-processing options, MSAA, etc).
     * Mirror/fresnel reflection.
     * Refraction.
@@ -29,6 +32,7 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
     * Texture maps (additionally, adaptive sampling/mipmaps).
     * Perlin/simplex/procedual noise/textures.
     * Allow settings to be modifiable while the simulation is running.
+    * Simpler means of setting variables/setting scenes. E.g. attenuation coefficients are awkwardly small and difficult to adjust. 
 * Optimization
     * Hierarchical Bounding volumes for complex meshes.
     * Spatial hashing/ray marching.
