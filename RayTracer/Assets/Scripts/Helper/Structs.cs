@@ -75,4 +75,24 @@ public static class Structs {
             this.matIds = matIds;
         }
     }
+
+    public struct MeshStruct {
+        public int vertStart, triStart, vertCount, triCount, matId;
+
+        public MeshStruct(int vertStart, int triStart, int vertCount, int triCount, int matId) {
+            this.vertStart = vertStart;
+            this.triStart = triStart;
+            this.vertCount = vertCount;
+            this.triCount = triCount;
+            this.matId = matId;
+        }
+
+        public MeshStruct(int vertStart, int triStart, int vertCount, int triCount) {
+            this.vertStart = vertStart;
+            this.triStart = triStart;
+            this.vertCount = vertCount;
+            this.triCount = triCount;
+            matId = 0;
+        }
+    }
 }

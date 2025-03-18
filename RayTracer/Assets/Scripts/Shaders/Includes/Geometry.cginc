@@ -34,6 +34,10 @@ struct Quadric {
     }
 };
 
+struct Mesh {
+    int vertStart, triStart, vertCount, triCount, matId;
+};
+
 Intersection CheckForIntersections (RWStructuredBuffer<Sphere> objs, int count, Intersection intersection, Ray ray) {
     float b, c, discriminant, root, t2;
     float3 vec, normal;
@@ -143,3 +147,5 @@ Intersection CheckForIntersections (RWStructuredBuffer<Quadric> objs, int count,
     
     return intersection;
 }
+
+//mesh intersection located in RayTracer.compute, since it was cumbersome to pass all the vert/tri/normal buffers into the method

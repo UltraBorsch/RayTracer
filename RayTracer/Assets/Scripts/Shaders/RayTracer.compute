@@ -44,11 +44,22 @@ int quadricCount;
 RWStructuredBuffer<AABB> boxes;
 int AABBCount;
 
+RWStructuredBuffer<Mesh> meshes;
+int meshCount;
+
+//mesh buffers
+RWStructuredBuffer<float3> vertices;
+RWStructuredBuffer<float3> normals;
+RWStructuredBuffer<int3> triangles;
+int vertexCount, triangleCount;
+
+Intersection CheckForIntersections( RWStructuredBuffer<Mesh> objs, int count, Intersection intersection, Ray ray);
 Intersection CheckIntersections (Ray ray, Intersection intersection) {
     intersection = CheckForIntersections(spheres, sphereCount, intersection, ray);
     intersection = CheckForIntersections(planes, planeCount, intersection, ray);
     intersection = CheckForIntersections(quadrics, quadricCount, intersection, ray);
-    return CheckForIntersections(boxes, AABBCount, intersection, ray);
+    intersection = CheckForIntersections(boxes, AABBCount, intersection, ray);
+    return CheckForIntersections(meshes, meshCount, intersection, ray);
 }
 
 //Note, product must be <= 1024
@@ -155,4 +166,14 @@ void AAReduction (uint3 id : SV_DispatchThreadID) {
     
     if (id.z == 0)
         result[id.xy] = AAResults[i];
+}
+
+Intersection CheckForIntersections (RWStructuredBuffer<Mesh> objs, int count, Intersection intersection, Ray ray) {
+    for (int i = 0; i < count; i++) {
+        Mesh mesh = objs[i];
+        
+        //TODO
+    }
+    
+    return intersection;
 }

@@ -23,11 +23,13 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private Plane[] planes;
     [SerializeField] private Quadric[] quadrics;
     [SerializeField] private AABB[] boxes;
+    [SerializeField] private Mesh[] meshes;
 
     [SerializeField] private Sphere dummySphere;
     [SerializeField] private Plane dummyPlane;
     [SerializeField] private Quadric dummyQuadric;
     [SerializeField] private AABB dummyAABB;
+    [SerializeField] private Mesh dummyMesh;
 
     private void Awake() {
         SetupScene(sceneInfo);
@@ -45,6 +47,10 @@ public class RayGenerator : MonoBehaviour {
 
         camController.useRayTracing = useRayTracing;
         camController.image = image;
+
+        foreach (Mesh mesh in meshes) {
+            mesh.Setup();
+        }
 
         SetRenderVars();
     }
@@ -95,41 +101,59 @@ public class RayGenerator : MonoBehaviour {
         float[] res = new[] { resolution.x, resolution.y, 1.0f / resolution.x, 1.0f / resolution.y };
         SetParam(rayTracer, res, "resolution");
         //rayTracer.SetTexture(0, "result", image);
-        rayTracer.SetTexture(1, "result", image);
+        //rayTracer.SetTexture(1, "result", image);
         rayTracer.SetTexture(2, "result", image);
 
+        //Set all the buffers/counts. Note that i cannot pass an empty buffer, and i assume trying to access a non-set buffer is undefined in some way,
+        //so I add a dummy value that will never be accessed before setting the empty ones.
         SetParam(rayTracer, lights.Length, "lightCount");
         SetParam(rayTracer, Mats.Length, "matCount");
         SetParam(rayTracer, spheres.Length, "sphereCount");
         SetParam(rayTracer, planes.Length, "planeCount");
         SetParam(rayTracer, quadrics.Length, "quadricCount");
         SetParam(rayTracer, boxes.Length, "AABBCount");
+        SetParam(rayTracer, meshes.Length, "meshCount");
 
         spheres = spheres.Length == 0 ? new[] { dummySphere } : spheres;
         planes = planes.Length == 0 ? new[] { dummyPlane } : planes;
         quadrics = quadrics.Length == 0 ? new[] { dummyQuadric } : quadrics;
         boxes = boxes.Length == 0 ? new[] { dummyAABB } : boxes;
+        if (meshes.Length == 0) {
+            meshes = new[] { dummyMesh };
+            vertices.Add(new(0, 0, 0));
+            normals.Add(new(0, 0, 0));
+            triangles.AddRange(new[] {0, 0, 0});
+        }
 
         CreateAndSetBuffer(rayTracer, "TraceRays", "spheres", spheres);
         CreateAndSetBuffer(rayTracer, "TraceRays", "planes", planes);
         CreateAndSetBuffer(rayTracer, "TraceRays", "quadrics", quadrics);
         CreateAndSetBuffer(rayTracer, "TraceRays", "boxes", boxes);
+        CreateAndSetBuffer(rayTracer, "TraceRays", "meshes", meshes);
         CreateAndSetBuffer(rayTracer, "TraceRays", "mats", Mats);
         CreateAndSetBuffer(rayTracer, "TraceRays", "lights", lights);
 
-        int AABufferCount = (int)(resolution.x * resolution.y * samples * samples);
-        ComputeBuffer AABuffer = CreateBuffer<Vector4>(AABufferCount);
-        SetBuffer(rayTracer, "TraceRays", "AAResults", AABuffer);
-        SetBuffer(rayTracer, "CorrectImage", "AAResults", AABuffer);
-        SetBuffer(rayTracer, "AAReduction", "AAResults", AABuffer);
-
+        //ambient lighting
         SetParam(rayTracer, ambientIntensity, "ambientIntensity");
         SetParam(rayTracer, ambientColour, "ambientColour");
 
+        //SSAA buffer
+        int AABufferCount = (int)(resolution.x * resolution.y * samples * samples);
+        ComputeBuffer AABuffer = CreateBuffer<Vector4>(AABufferCount);
+        SetBuffer(rayTracer, "TraceRays", "AAResults", AABuffer);
+        //SetBuffer(rayTracer, "CorrectImage", "AAResults", AABuffer);
+        SetBuffer(rayTracer, "AAReduction", "AAResults", AABuffer);
+
+        //SSAA params
         SetParam(rayTracer, samples, "samples");
         SetParam(rayTracer, 1f / samples, "sampleInv");
         SetParam(rayTracer, 1f / (samples + 1), "nextSampleInv");
         SetParam(rayTracer, samples * samples, "sampleSquare");
         SetParam(rayTracer, 1f / (samples * samples), "sampleSquareInv");
+
+        //Set mesh data buffers
+        CreateAndSetBuffer(rayTracer, "TraceRays", "vertices", vertices.ToArray());
+        CreateAndSetBuffer(rayTracer, "TraceRays", "triangles", triangles.ToArray());
+        CreateAndSetBuffer(rayTracer, "TraceRays", "normals", normals.ToArray());
     }
 }
