@@ -8,7 +8,6 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 * Spheres, Planes, Axis-Aligned Bounding Boxes, Quadrics (kinda).
 * Rotated grid super sampling anti-aliasing.
 * Shadows.
-* SSAA.
 * Basic light attenuation.
 
 # TODO
