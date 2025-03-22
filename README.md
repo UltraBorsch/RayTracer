@@ -40,3 +40,5 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 # Known Issues
    * Bugs with some quadrics. Notably, elliptic cones clearly work but ellipsoids do not look like ellipsoids.
    * Potential visual bug with AABBs. Certain faces sometimes stop rendering at certain angles. I have noticed it specifically with the faces perpendicular to the y-axis, but does not happen always.
+   * While not tested, im quite sure that there are bugs when using odd sample values, decimal sample values, and sample values >= 12. Realistically, any value > 8 will have increasing performance
+     penalties at drastically reduced benefits.
