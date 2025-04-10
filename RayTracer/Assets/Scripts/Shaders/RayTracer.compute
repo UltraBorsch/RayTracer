@@ -173,6 +173,22 @@ Intersection CheckForIntersections (RWStructuredBuffer<Mesh> objs, int count, In
         Mesh mesh = objs[i];
         
         //TODO
+        
+        //might be worthwhile to precompute normal of each triangle ahead of time. otherwise need to do a normalize + cross product for each triangle
+        
+        /*
+        
+        Check intersection with mesh's bounding box. continue if no intersection
+
+        for each triangle in the mesh
+            check if ray intersects triangle (using tri norm)
+            calculate t (continue if bigger than previous known t)
+            check backface culling (using tri norm) (continue if back collision)
+            interpolate the normal at the collision position (using vert norms) to get the actual surface normal
+            set new intersection
+
+
+        */
     }
     
     return intersection;

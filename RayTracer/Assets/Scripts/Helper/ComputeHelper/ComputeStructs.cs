@@ -1,7 +1,14 @@
 using UnityEngine;
 using System;
 
-public static class ComputeStructs { 
+public static class ComputeStructs {
+
+    [Serializable]
+    public struct ComputeFormat<T> {
+        public T value;
+        public string name;
+    };
+
     public struct Matrix2x3 : IEquatable<Matrix2x3>, IFormattable {
         public float m00;
         public float m10;

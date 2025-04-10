@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using static ComputeStructs;
 
 public static class ComputeHelper {
     private static readonly List<ComputeBuffer> createdBuffers = new();
@@ -51,6 +52,19 @@ public static class ComputeHelper {
             case Vector3Int iv3: shader.SetInts(valueName, new[] { iv3.x, iv3.y, iv3.z }); break;
             default: Debug.LogError($"Error: {typeof(T)} is not an implemented type to pass to shader {shader.name}."); break;
         }
+    }
+
+    public static void SetParam(ComputeShader shader, ComputeData data) {
+        foreach (ComputeFormat<int> cf in data.ints) SetParam(shader, cf.value, cf.name);
+        foreach (ComputeFormat<float> cf in data.floats) SetParam(shader, cf.value, cf.name);
+        foreach (ComputeFormat<bool> cf in data.bools) SetParam(shader, cf.value, cf.name);
+        foreach (ComputeFormat<Vector4> cf in data.vectors) SetParam(shader, cf.value, cf.name);
+        foreach (ComputeFormat<Matrix4x4> cf in data.matrices) SetParam(shader, cf.value, cf.name);
+
+        foreach (ComputeFormat<List<int>> cf in data.intLists) SetParam(shader, cf.value.ToArray(), cf.name);
+        foreach (ComputeFormat<List<float>> cf in data.floatLists) SetParam(shader, cf.value.ToArray(), cf.name);
+        foreach (ComputeFormat<List<Vector4>> cf in data.vectorLists) SetParam(shader, cf.value.ToArray(), cf.name);
+        foreach (ComputeFormat<List<Matrix4x4>> cf in data.matrixLists) SetParam(shader, cf.value.ToArray(), cf.name);
     }
 
     /// <summary> Get thread group sizes for each dimension of a kernel.</summary>
