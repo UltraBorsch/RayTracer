@@ -1,7 +1,7 @@
 # RayTracer
 A fairly simply ray tracer using C#/HLSL/Unity.
 
-![alt text](https://github.com/UltraBorsch/RayTracer/images/scene.png)
+!(https://github.com/UltraBorsch/RayTracer/imgs/scene.png)
 
 Inspiration taken from Sebastian Lague's and Acerola's videos regarding the same topic, and to an extent a similarly themed class assignment.\
 Although, I add my own twists, with the end goal for this to be a standalone creation.
