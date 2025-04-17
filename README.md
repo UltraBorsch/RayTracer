@@ -14,8 +14,8 @@ Part of the challenge is to avoid using the built in ray-tracing features provid
 
 # TODO
 * General refactoring is much needed.
-* More standard shapes (OBB, implicits, bezier surface patches, etc).
-* More complex shapes (hierarchies, constructive geometry, etc).
+* More standard shapes (implicits, bezier surface patches, metabals, etc).
+* More complex shapes (oriented bounding boxes, hierarchies, constructive geometry, etc).
     * Asserting that said shapes conform, e.g. generating normals when meshes do not provide them, no trailing vertices, etc.
 * Transformation matrices for applicable geometry types (notably not spheres and planes).
 * Bounds for certain geometry (could possibly use for all geometry types, but in particular for planes and quadrics so that they're not infinite).
