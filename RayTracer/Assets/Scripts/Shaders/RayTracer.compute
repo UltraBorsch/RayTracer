@@ -5,7 +5,7 @@
 #include "Includes/Geometry.cginc" //already includes constants and structs
 
 //global variables that do not change
-float4 ambientColour;
+float4 ambientColour, skyColour;
 float ambientIntensity;
 
 RWTexture2D<float4> result; //raytrace result
@@ -135,7 +135,7 @@ void TraceRays (uint3 id : SV_DispatchThreadID) {
         }
 
         colour += ambientIntensity * ambientColour;
-    }
+    } else colour = skyColour;
     
     colour *= sampleSquareInv;
     index = id.y * resolution.x * sampleSquare + id.x * sampleSquare;
@@ -169,26 +169,57 @@ void AAReduction (uint3 id : SV_DispatchThreadID) {
 }
 
 Intersection CheckForIntersections (RWStructuredBuffer<Mesh> objs, int count, Intersection intersection, Ray ray) {
+    float tmin, tmax, bmin, bmax, dmin, dmax;
+    
     for (int i = 0; i < count; i++) {
         Mesh mesh = objs[i];
+                
+        tmin = 0;
+        tmax = intersection.t;
         
-        //TODO
+        for (int j = 0; j < 3; j++) {
+            bmin = mesh.corners[ray.negativeDir[j]][j];
+            bmax = mesh.corners[!ray.negativeDir[j]][j];
+            
+            dmin = (bmin - ray.origin[j]) * ray.invDirection[j];
+            dmax = (bmax - ray.origin[j]) * ray.invDirection[j];
+            
+            tmin = max(dmin, tmin);
+            tmax = min(dmax, tmax);
+        }
         
-        //might be worthwhile to precompute normal of each triangle ahead of time. otherwise need to do a normalize + cross product for each triangle
+        if (tmin > tmax || tmin <= EPSILON) continue;
         
-        /*
-        
-        Check intersection with mesh's bounding box. continue if no intersection
+        /*vars needed:
+            v2 - v1, v3 - v1, v1*/
+        for (int k = mesh.triStart; k < mesh.triStart + mesh.triCount; k++) {
+            int3 tri = triangles[k];
+            float3 v1 = vertices[tri.x], v2 = vertices[tri.y], v3 = vertices[tri.z];
+            float3 n1 = normals[tri.x], n2 = normals[tri.y], n3 = normals[tri.z];
+            float3 pvec = cross(ray.direction, v3 - v1);
+            
+            float det = dot(v2 - v1, pvec);
+            
+            if (det <= EPSILON) continue;
+            
+            float detInv = 1 / det;
+            
+            float3 tvec = ray.origin - v1;
+            float3 qvec = cross(tvec, v2 - v1);
+            
+            float t = dot(v3 - v1, qvec) * detInv;
+            if (t <= EPSILON || t > intersection.t) continue;
+            
+            float u = dot(tvec, pvec) * detInv;
+            if (u < 0 || u > 1) continue;
+            
+            float v = dot(ray.direction, qvec) * detInv;
+            if (v < 0 || u + v > 1) continue;
+            
+            float3 normal = (1 - u - v) * n1 + u * n2 + v * n3;
+            intersection = GenerateIntersection(t, normal, ray.Extend(t), mesh.matId);
+        }
 
-        for each triangle in the mesh
-            check if ray intersects triangle (using tri norm)
-            calculate t (continue if bigger than previous known t)
-            check backface culling (using tri norm) (continue if back collision)
-            interpolate the normal at the collision position (using vert norms) to get the actual surface normal
-            set new intersection
-
-
-        */
     }
     
     return intersection;

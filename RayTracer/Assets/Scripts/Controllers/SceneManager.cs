@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 public static class SceneManager {
     [SerializeField] static public MatInfo[] Mats { get; set; }
@@ -18,9 +19,9 @@ public static class SceneManager {
         Mats = sceneInfo.Mats;
     }
 
-    public static Vector2Int AddMesh(UnityEngine.Mesh mesh) {
+    public static Vector2Int AddMesh(UnityEngine.Mesh mesh, Transform transform) {
         Vector2Int indices = new() { x = vertices.Count, y = triangles.Count };
-        vertices.AddRange(mesh.vertices);
+        vertices.AddRange(mesh.vertices.Select(i => Vector3.Scale(i, transform.localScale) + transform.position));
         triangles.AddRange(mesh.triangles);
         normals.AddRange(mesh.normals);
         return indices;

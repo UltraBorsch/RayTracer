@@ -14,7 +14,7 @@ public class RayGenerator : MonoBehaviour {
     [SerializeField] private RayTracerLight[] lights;
     [SerializeField] private Vector3? prevPos = null, prevFor = null;
     [SerializeField] private bool useRayTracing, useScreenResolution;
-    [SerializeField] private Color ambientColour;
+    [SerializeField] private Color ambientColour, skyColour;
     [SerializeField] private float ambientIntensity;
     [SerializeField] private float samples;
 
@@ -113,6 +113,7 @@ public class RayGenerator : MonoBehaviour {
         SetParam(rayTracer, quadrics.Length, "quadricCount");
         SetParam(rayTracer, boxes.Length, "AABBCount");
         SetParam(rayTracer, meshes.Length, "meshCount");
+        SetParam(rayTracer, skyColour, "skyColour");
 
         spheres = spheres.Length == 0 ? new[] { dummySphere } : spheres;
         planes = planes.Length == 0 ? new[] { dummyPlane } : planes;

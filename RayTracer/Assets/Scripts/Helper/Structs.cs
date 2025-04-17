@@ -77,22 +77,25 @@ public static class Structs {
     }
 
     public struct MeshStruct {
+        public Matrix2x3 corners;
         public int vertStart, triStart, vertCount, triCount, matId;
 
-        public MeshStruct(int vertStart, int triStart, int vertCount, int triCount, int matId) {
+        public MeshStruct(int vertStart, int triStart, int vertCount, int triCount, int matId, Matrix2x3 corners) {
             this.vertStart = vertStart;
             this.triStart = triStart;
             this.vertCount = vertCount;
             this.triCount = triCount;
             this.matId = matId;
+            this.corners = corners;
         }
 
-        public MeshStruct(int vertStart, int triStart, int vertCount, int triCount) {
+        public MeshStruct(int vertStart, int triStart, int vertCount, int triCount, Matrix2x3 corners) {
             this.vertStart = vertStart;
             this.triStart = triStart;
             this.vertCount = vertCount;
             this.triCount = triCount;
             matId = 0;
+            this.corners = corners;
         }
     }
 }

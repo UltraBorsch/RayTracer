@@ -35,6 +35,7 @@ struct Quadric {
 };
 
 struct Mesh {
+    float2x3 corners;
     int vertStart, triStart, vertCount, triCount, matId;
 };
 
