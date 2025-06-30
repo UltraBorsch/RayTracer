@@ -9,21 +9,26 @@ Although, I add my own twists, with the end goal for this to be a standalone cre
 Part of the challenge is to avoid using the built in ray-tracing features provided by the Unity engine.
 
 # IMPLEMENTED
-* Spheres, Planes, Axis-Aligned Bounding Boxes, Quadrics (kinda), Meshes whose values exist and are well formatted (norms, tris, verts, etc).
+* Spheres, Planes, Axis-Aligned Bounding Boxes, Quadrics (kinda), Meshes formed from valid and properly formatted values (norms, tris, verts, etc).
 * Rotated grid super sampling anti-aliasing.
 * Shadows.
 * Basic light attenuation.
 
 # TODO
 * General refactoring is much needed.
+    * Seperating shader code into different shaders (sadly will result in more GPU jobs).
+    * Reducing branching within shaders.
+    * Reduce lookups.
+    * Reduce memory allocation/deallocation.
 * More standard shapes (implicits, bezier surface patches, metabals, etc).
 * More complex shapes (oriented bounding boxes, hierarchies, constructive geometry, etc).
     * Asserting that said shapes conform, e.g. generating normals when meshes do not provide them, no trailing vertices, etc.
-* Transformation matrices for applicable geometry types (notably not spheres and planes).
+* Transformation matrices for applicable geometry types (notably not planes, while sphered would only need scaling).
+    * Could replace certain shape implementations, e.g. a transformed AABB is equivalent to a OBB.
 * Bounds for certain geometry (could possibly use for all geometry types, but in particular for planes and quadrics so that they're not infinite).
 * Additional features:
     * More complex/efficient light attenuation;
-    * More Anti-Aliasing options (jittering, post-processing options, MSAA, etc).
+    * More Anti-Aliasing options (jittering, post-processing options, MSAA, none, etc).
     * Mirror/fresnel reflection.
     * Refraction.
     * Motion blur.
@@ -41,6 +46,7 @@ Part of the challenge is to avoid using the built in ray-tracing features provid
     * Spatial hashing/ray marching.
     * Culling, probably by giving every (complex) geometry a bounding box.
     * Precomputing certain values when possible/worthwhile.
+      * Precompute all the initial rays into a buffer for the shader(s) to use.
 # Known Issues
    * Bugs with some quadrics. Notably, elliptic cones clearly work but ellipsoids do not look like ellipsoids.
    * While not tested, im quite sure that there are bugs when using odd sample values, decimal sample values, and sample values >= 12. Realistically, any value > 8 will have increasing performance
